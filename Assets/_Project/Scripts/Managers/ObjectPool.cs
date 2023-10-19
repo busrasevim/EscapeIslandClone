@@ -13,29 +13,12 @@ public class ObjectPool : MonoBehaviour
         public int size;
         [HideInInspector] public Transform poolParent;
     }
-    
-    #region Singleton
-
-    public static ObjectPool instance = null;
-
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            DestroyImmediate(this);
-        }
-    }
-
-    #endregion
 
     private GameObject POOL_PARENT;
     public List<Pool> pools;
     private Dictionary<PoolTags, Queue<GameObject>> _poolDictionary;
 
+    
     public void PreparePools()
     {
         POOL_PARENT = new GameObject("POOL_PARENT");

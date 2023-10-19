@@ -13,11 +13,13 @@ public class GameManager : IInitializable, IDisposable, ITickable
         [Inject] private MainStateMachine _mainStateMachine;
         [Inject] private UIStateMachine _uIStateMachine;
         [Inject] private LevelManager _levelManager;
+        [Inject] private ObjectPool _objectPool;
         private FXManager _fxManager;
         
         public void Initialize()
         {
             //like normal initialize method, before all awakes
+            _objectPool.PreparePools();
             SetUpLevel();
         }
         
