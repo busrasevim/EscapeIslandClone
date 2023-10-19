@@ -1,0 +1,23 @@
+using UnityEngine;
+using Zenject;
+
+public class GameSceneMonoInstaller : MonoInstaller
+{
+    [SerializeField] private GameObject inputHandlerObject;
+    [SerializeField] private GameObject objectPoolObject;
+    
+    public override void InstallBindings()
+    {
+        SignalBusInstaller.Install(Container);
+        Container.DeclareSignal<OnLevelCompletedSignal>().OptionalSubscriber();
+        Container.Bind<ISaveSystem>().To<JsonSaveSystem>().AsSingle();
+        Container.Bind<IInputHandler>().To<MobileInputHandler>().FromComponentInNewPrefab(inputHandlerObject).AsSingle();
+        Container.BindInterfacesAndSelfTo<DataManager>().AsSingle();
+        Container.Bind<ObjectPool>().FromComponentInNewPrefab(objectPoolObject).AsSingle();
+        Container.BindInterfacesAndSelfTo<MainStateMachine>().AsSingle();
+        Container.BindInterfacesAndSelfTo<UIStateMachine>().AsSingle();
+        Container.BindInterfacesAndSelfTo<LevelManager>().AsSingle();
+        Container.BindInterfacesAndSelfTo<GameManager>().AsSingle();
+        Container.BindInterfacesAndSelfTo<StickManager>().AsSingle();
+    }
+}
