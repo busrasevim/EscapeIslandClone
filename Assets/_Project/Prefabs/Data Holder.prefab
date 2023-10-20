@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7238971267313503069
+--- !u!1 &476620482471139132
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,52 +8,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5069062623004718268}
-  - component: {fileID: 8622582206631468190}
+  - component: {fileID: 5617601434884620397}
+  - component: {fileID: 912608411224063453}
   m_Layer: 0
-  m_Name: pool
+  m_Name: Data Holder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5069062623004718268
+--- !u!4 &5617601434884620397
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7238971267313503069}
+  m_GameObject: {fileID: 476620482471139132}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5436861, y: -1.4176229, z: -0.48827004}
+  m_LocalPosition: {x: 2.0783634, y: 3.5052283, z: 2.4766526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8622582206631468190
+--- !u!114 &912608411224063453
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7238971267313503069}
+  m_GameObject: {fileID: 476620482471139132}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5f6fa74709fa5b4097b3ae679605f61, type: 3}
+  m_Script: {fileID: 11500000, guid: 9d12d8210cf595a469be3746749f16b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pools:
-  - tag: 1
-    prefab: {fileID: 7584499966191485062, guid: 531be338519548e47b287e002283ac22, type: 3}
-    size: 10
-    poolParent: {fileID: 0}
-  - tag: 0
-    prefab: {fileID: 1819322328528329745, guid: 2fa9f4fad875cfa49922af9813e6edf5, type: 3}
-    size: 60
-    poolParent: {fileID: 0}
-  - tag: 2
-    prefab: {fileID: 7056023463794435197, guid: 001d537a1c28c3b408a22b16c74cc108, type: 3}
-    size: 10
-    poolParent: {fileID: 0}
+  settings: {fileID: 11400000, guid: da79c7f2f2051de4997951675396f0e0, type: 2}

@@ -9,12 +9,12 @@ public class Stick : MonoBehaviour
 
     public void PrepareStick(Color color)
     {
-        
+        GetComponentInChildren<Renderer>().material.color = color;
     }
     
     public void GoNewPlace(Vector3 position, Island.SlotGroup group)
     {
         _currentSlotGroup = group;
-        transform.DOMove(position, 1f);
+        transform.DOLocalMove(position, 1f);
     }
 }

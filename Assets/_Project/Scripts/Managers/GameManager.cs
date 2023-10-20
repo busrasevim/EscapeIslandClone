@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class GameManager : IInitializable, IDisposable, ITickable
+public class GameManager : IInitializable, IDisposable
 {
     public event Action StartAction;
     public event Action<bool> EndAction;
@@ -26,11 +26,6 @@ public class GameManager : IInitializable, IDisposable, ITickable
         public void Dispose()
         {
             //like onDestroy, after all destroy methods
-        }
-
-        public void Tick()
-        {
-            //like update
         }
 
         private void SetUpLevel()

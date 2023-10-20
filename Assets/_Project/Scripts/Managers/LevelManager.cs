@@ -11,16 +11,20 @@ public class LevelManager : IInitializable
     private GameObject _levelObject;
 
     private DataManager _dataManager;
-    
+
     public int CurrentLevelNo { get; private set; }
     public Level CurrentLevel { get; private set; }
 
     [Inject] private SignalBus _signalBus;
-    
+    [Inject] private ObjectPool _objectPool;
+    [Inject] private StickManager _stickManager;
+    [Inject] private DataHolder _dataHolder;
+
     public void Initialize()
     {
         //level number value, generating etc
         SetInitialLevel();
+        _generator = new LevelGenerator(this, _objectPool, _stickManager, _dataHolder.settings);
     }
 
     [Inject]
@@ -40,7 +44,6 @@ public class LevelManager : IInitializable
 
         CurrentLevel = new Level();
 
-        _generator = new LevelGenerator(this);
         _generator.GenerateLevel();
     }
 
@@ -69,7 +72,6 @@ public class Level
 {
     public Level()
     {
-        
     }
 }
 

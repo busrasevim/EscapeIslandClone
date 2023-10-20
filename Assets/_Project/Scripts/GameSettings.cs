@@ -6,4 +6,5 @@ using UnityEngine;
 public class GameSettings : ScriptableObject
 {
     public int slotStickCount;
+    public Color[] stickColors;
 }

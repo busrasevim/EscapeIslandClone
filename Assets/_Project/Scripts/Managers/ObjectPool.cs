@@ -99,4 +99,5 @@ public enum PoolTags
 {
     Stick,
     Island,
+    Line,
 }
