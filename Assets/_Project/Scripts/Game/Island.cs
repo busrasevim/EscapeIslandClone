@@ -61,7 +61,6 @@ public class Island : MonoBehaviour
 
     public bool TryGetEmptySlotGroup(out SlotGroup group)
     {
-        Debug.Log(_emptySlots.Count);
         if (_emptySlots.Count == 0)
         {
             group = default;
@@ -70,7 +69,6 @@ public class Island : MonoBehaviour
 
         group = _emptySlots.Pop();
         
-        Debug.Log(_emptySlots.Count);
         return true;
     }
 
