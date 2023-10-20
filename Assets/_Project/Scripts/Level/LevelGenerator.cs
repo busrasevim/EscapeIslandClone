@@ -10,6 +10,7 @@ public class LevelGenerator
     private Vector3[] _islandPositions;
     private StickManager _stickManager;
     private List<Island> _islands;
+    private Island[] _levelIslands;
     private GameSettings _settings;
 
     public LevelGenerator(LevelManager levelManager, ObjectPool pool, StickManager stickManager, GameSettings settings)
@@ -36,14 +37,24 @@ public class LevelGenerator
     public void GenerateLevel()
     {
         GenerateIslands();
-
-        for (int i = 0; i < 20; i++)
+        _stickManager.GenerateSticks(3);
+        
+        var sticks = _stickManager.GetLevelSticks();
+        var islandIndex = 0;
+        for (int i = 0; i < sticks.Count; i++)
         {
-            var slotGroup = new Island.SlotGroup();
-            var island = _islands.GetRandomElement();
-            if (island.TryGetEmptySlotGroup(out slotGroup))
+            var group = new Island.SlotGroup();
+            if (_levelIslands[islandIndex].TryGetEmptySlotGroup(out group))
             {
-                _stickManager.SpawnNewStickGroup(island.transform, slotGroup, _settings.stickColors.GetRandomElement());
+                sticks[i].ChangeGroupPosition(group);
+            }
+            else
+            {
+                islandIndex++;
+                if (_levelIslands[islandIndex].TryGetEmptySlotGroup(out group))
+                {
+                    sticks[i].ChangeGroupPosition(group);
+                }
             }
         }
         
@@ -59,7 +70,14 @@ public class LevelGenerator
                 .GetComponent<Island>();
 
             island.Initialize(_settings);
+            island.Deactivate();
             _islands.Add(island);
+        }
+
+        _levelIslands = _islands.GetRandomElements(4);
+        foreach (var island in _levelIslands)
+        {
+            island.Activate();
         }
     }
 }

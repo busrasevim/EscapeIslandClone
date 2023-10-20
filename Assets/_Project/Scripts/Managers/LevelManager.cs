@@ -19,6 +19,7 @@ public class LevelManager : IInitializable
     [Inject] private ObjectPool _objectPool;
     [Inject] private StickManager _stickManager;
     [Inject] private DataHolder _dataHolder;
+    
 
     public void Initialize()
     {

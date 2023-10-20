@@ -18,8 +18,6 @@ public class GameManager : IInitializable, IDisposable
         
         public void Initialize()
         {
-            //like normal initialize method, before all awakes
-            _objectPool.PreparePools();
             SetUpLevel();
         }
         
@@ -81,10 +79,5 @@ public class GameManager : IInitializable, IDisposable
         }
 
         #endregion
-
-        public void TestMethod()
-        {
-            Debug.Log("test is successfull");
-        }
     }
 

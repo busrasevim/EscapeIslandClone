@@ -17,4 +17,14 @@ public class Stick : MonoBehaviour
         _currentSlotGroup = group;
         transform.DOLocalMove(position, 1f);
     }
+
+    public void Deactivate()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void Activate()
+    {
+        gameObject.SetActive(true);
+    }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 public class ObjectPool : MonoBehaviour
 {
@@ -18,6 +19,11 @@ public class ObjectPool : MonoBehaviour
     public List<Pool> pools;
     private Dictionary<PoolTags, Queue<GameObject>> _poolDictionary;
 
+    [Inject]
+    private void Construct()
+    {
+        PreparePools();
+    }
     
     public void PreparePools()
     {

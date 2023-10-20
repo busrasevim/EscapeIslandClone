@@ -1,17 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Lean.Common;
 using UnityEngine;
 using Zenject;
 
-public class Island : MonoBehaviour
+public class Island : LeanSelectableBehaviour
 {
     [SerializeField] private Transform leftBorder;
     [SerializeField] private Transform rightBorder;
     [SerializeField] private Transform behindBorder;
     [SerializeField] private Transform frontBorder;
-
-    public GameSettings settings;
 
     [Serializable]
     public struct SlotGroup
@@ -34,6 +33,7 @@ public class Island : MonoBehaviour
                 var newPosition = new Vector3(newPositionX, 0f, slotZPosition);
                 slotPositions.Add(newPosition);
             }
+            
         }
     }
 
@@ -75,5 +75,25 @@ public class Island : MonoBehaviour
     public void SetSlotEmpty(SlotGroup group)
     {
         _emptySlots.Push(group);
+    }
+
+    public void Activate()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void Deactivate()
+    {
+        gameObject.SetActive(false);
+    }
+
+    protected override void OnSelected(LeanSelect select)
+    {
+        transform.position += Vector3.up * 0.2f;
+    }
+
+    protected override void OnDeselected(LeanSelect select)
+    {
+        transform.position -= Vector3.up * 0.2f;
     }
 }

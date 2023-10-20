@@ -19,7 +19,7 @@ public class GameSceneMonoInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<MainStateMachine>().AsSingle();
         Container.BindInterfacesAndSelfTo<UIStateMachine>().AsSingle();
         Container.BindInterfacesAndSelfTo<LevelManager>().AsSingle();
+        Container.BindInterfacesAndSelfTo<StickManager>().AsSingle();
         Container.BindInterfacesAndSelfTo<GameManager>().AsSingle();
-        Container.Bind<StickManager>().AsSingle();
     }
 }
