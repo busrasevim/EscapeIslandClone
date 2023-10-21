@@ -57,7 +57,7 @@ public class DataManager : IInitializable, IDisposable
     
     private void OnLevelCompleted(OnLevelCompletedSignal args)
     {
-        _gameData.currentLevelNumber = args.LevelIndex;
+        _gameData.currentLevelNumber = args.LevelIndex+1;
         SaveData();
     }
 }

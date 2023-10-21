@@ -26,6 +26,8 @@ public class MatchController
         else
         {
             _selectedIsland = island;
+            if(_selectedIsland.IsIslandEmpty())
+                DeselectAll();
         }
     }
 

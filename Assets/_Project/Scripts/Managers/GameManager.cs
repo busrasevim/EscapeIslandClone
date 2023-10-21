@@ -75,14 +75,16 @@ public class GameManager : IInitializable, IDisposable
     {
         _levelManager.NextLevel();
 
-        _fxManager.PlayLevelCompleteFX();
+      //  _fxManager.PlayLevelCompleteFX();
 
         //    _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelCompleted);
+        Debug.Log("Level completed.");
     }
 
     private void LevelFailed()
     {
         // _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelFailed);
+        Debug.Log("Level failed.");
     }
 
     #endregion

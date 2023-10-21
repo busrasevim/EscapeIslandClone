@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -7,9 +8,11 @@ public class StickManager: IInitializable
 {
     [Inject] private ObjectPool _objectPool;
     [Inject] private DataHolder _dataHolder;
+    [Inject] private GameManager _gameManager;
     private GameSettings _settings;
     private List<StickGroup> _levelSticks;
     private Dictionary<Color, List<StickGroup>> _allSticks;
+    private Dictionary<Color, bool> _colorCompletion;
     
     public void Initialize()
     {
@@ -49,6 +52,16 @@ public class StickManager: IInitializable
         GenerateLevelSticks(colorCount);
     }
 
+    public void CompleteColor(Color color)
+    {
+        _colorCompletion[color] = true;
+        var isComplete = _colorCompletion.All(kv => kv.Value);
+        if (isComplete)
+        {
+            _gameManager.EndLevel(true);
+        }
+    }
+
     public List<StickGroup> GetLevelSticks()
     {
         return _levelSticks;
@@ -56,6 +69,7 @@ public class StickManager: IInitializable
     
     private void GenerateLevelSticks(int colorCount)
     {
+        _colorCompletion = new Dictionary<Color, bool>();
         _levelSticks = GetLevelSticks(colorCount);
         _levelSticks.Shuffle();
 
@@ -78,6 +92,8 @@ public class StickManager: IInitializable
             {
                 sticks.Add(stickGroup);
             }
+            
+            _colorCompletion.Add(color,false);
         }
         
         return sticks;

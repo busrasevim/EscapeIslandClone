@@ -15,6 +15,7 @@ public class Island : LeanSelectableBehaviour
     private MatchController _matchController;
     private float _islandStartYPosition;
     private Tween _selectedTween;
+    private StickManager _stickManager;
 
     [Serializable]
     public class SlotGroup
@@ -46,7 +47,7 @@ public class Island : LeanSelectableBehaviour
     private Stack<SlotGroup> _emptySlots;
     private Stack<SlotGroup> _filledSlots;
 
-    public void Initialize(GameSettings settings, MatchController controller)
+    public void Initialize(GameSettings settings, MatchController controller, StickManager stickManager)
     {
         _slots = new List<SlotGroup>();
         
@@ -68,6 +69,7 @@ public class Island : LeanSelectableBehaviour
 
         _matchController = controller;
         _islandStartYPosition = transform.position.y;
+        _stickManager = stickManager;
     }
     
     public bool TryGetEmptySlotGroup(out SlotGroup group)
@@ -120,6 +122,12 @@ public class Island : LeanSelectableBehaviour
             _filledSlots.Push(slot);
             group.ChangeGroupPosition(slot, line);
         }
+
+        if (IsIslandComplete())
+        {
+            leanSelectable.enabled = false;
+            _stickManager.CompleteColor(GetFirstColor());
+        }
     }
 
     public int GetEmptySlotCount()
@@ -152,6 +160,7 @@ public class Island : LeanSelectableBehaviour
 
     public void Activate()
     {
+        leanSelectable.enabled = true;
         gameObject.SetActive(true);
     }
 
@@ -176,5 +185,21 @@ public class Island : LeanSelectableBehaviour
     {
         _selectedTween?.Kill();
         _selectedTween = transform.DOMoveY(_islandStartYPosition, 0.1f);
+    }
+
+    private bool IsIslandComplete()
+    {
+        if (_emptySlots.Count > 0) return false;
+        
+        var color = GetFirstColor();
+        foreach (var slot in _slots)
+        {
+            if (slot.slotColor != color)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

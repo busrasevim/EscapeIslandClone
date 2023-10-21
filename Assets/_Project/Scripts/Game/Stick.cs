@@ -24,7 +24,6 @@ public class Stick : MonoBehaviour
         for (int i = 0; i < positions.Length; i++)
         {
             positions[i] = linePositions[i + 1];
-            print(positions[i]+"     :"+i);
         }
 
         PlayRunAnimation();

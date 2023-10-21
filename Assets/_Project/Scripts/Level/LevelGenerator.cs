@@ -85,7 +85,7 @@ public class LevelGenerator
             var island = _objectPool.SpawnFromPool(PoolTags.Island, _islandPositions[i], rotation)
                 .GetComponent<Island>();
 
-            island.Initialize(_settings, _matchController);
+            island.Initialize(_settings, _matchController, _stickManager);
             island.Deactivate();
             _islands.Add(island);
         }
@@ -120,7 +120,7 @@ public class LevelGenerator
 
     private void SetLevelIslandAndColorCount(int currentLevelNumber)
     {
-        if (currentLevelNumber > 3 && currentLevelNumber % 3 == 0 || true)
+        if (currentLevelNumber > 3 && currentLevelNumber % 3 == 0)
         {
             _isBonusLevel = true;
             _currentLevelColorCount = 7;
