@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -8,76 +9,81 @@ public class GameManager : IInitializable, IDisposable
 {
     public event Action StartAction;
     public event Action<bool> EndAction;
-    
-        [Inject] private ISaveSystem _saveSystem;
-        [Inject] private MainStateMachine _mainStateMachine;
-        [Inject] private UIStateMachine _uIStateMachine;
-        [Inject] private LevelManager _levelManager;
-        [Inject] private ObjectPool _objectPool;
-        private FXManager _fxManager;
-        
-        public void Initialize()
-        {
-            SetUpLevel();
-        }
-        
-        public void Dispose()
-        {
-            //like onDestroy, after all destroy methods
-        }
 
-        private void SetUpLevel()
-        {
-            _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Start);
+    [Inject] private ISaveSystem _saveSystem;
+    [Inject] private MainStateMachine _mainStateMachine;
+    [Inject] private UIStateMachine _uIStateMachine;
+    [Inject] private LevelManager _levelManager;
+    [Inject] private ObjectPool _objectPool;
+    private FXManager _fxManager;
 
-            _levelManager.SetUpLevel();
-
-         //   _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.Start);
-        }
-
-        public void RestartLevel()
-        {
-            //will be filled...
-            
-            SetUpLevel();
-        }
-
-        #region Game State Events
-
-        public void StartLevel()
-        {
-            StartAction?.Invoke();
-        }
-
-        public void EndLevel(bool isWin)
-        {
-            _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Finish);
-
-            if (isWin)
-            {
-                LevelCompleted();
-                EndAction?.Invoke(true);
-                return;
-            }
-
-            LevelFailed();
-            EndAction?.Invoke(false);
-        }
-        
-        private void LevelCompleted()
-        {
-            _levelManager.NextLevel();
-
-            _fxManager.PlayLevelCompleteFX();
-
-        //    _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelCompleted);
-        }
-
-        private void LevelFailed()
-        {
-           // _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelFailed);
-        }
-
-        #endregion
+    public void Initialize()
+    {
+        SetUpLevel();
     }
 
+    public void Dispose()
+    {
+        //like onDestroy, after all destroy methods
+    }
+
+    private void SetUpLevel()
+    {
+        _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Start);
+
+        _levelManager.SetUpLevel();
+
+        //   _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.Start);
+    }
+    
+    private async void RestartLevelAfter(float delay)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(delay));
+        RestartLevel();
+    }
+    
+    public void RestartLevel()
+    {
+        //will be filled...
+
+        SetUpLevel();
+    }
+
+    #region Game State Events
+
+    public void StartLevel()
+    {
+        StartAction?.Invoke();
+    }
+
+    public void EndLevel(bool isWin)
+    {
+        _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Finish);
+
+        if (isWin)
+        {
+            LevelCompleted();
+            EndAction?.Invoke(true);
+            return;
+        }
+
+        LevelFailed();
+        EndAction?.Invoke(false);
+    }
+
+    private void LevelCompleted()
+    {
+        _levelManager.NextLevel();
+
+        _fxManager.PlayLevelCompleteFX();
+
+        //    _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelCompleted);
+    }
+
+    private void LevelFailed()
+    {
+        // _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelFailed);
+    }
+
+    #endregion
+}
