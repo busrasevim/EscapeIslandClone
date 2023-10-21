@@ -19,13 +19,14 @@ public class LevelManager : IInitializable
     [Inject] private ObjectPool _objectPool;
     [Inject] private StickManager _stickManager;
     [Inject] private DataHolder _dataHolder;
+    [Inject] private MatchController _matchController;
     
 
     public void Initialize()
     {
         //level number value, generating etc
         SetInitialLevel();
-        _generator = new LevelGenerator(this, _objectPool, _stickManager, _dataHolder.settings);
+        _generator = new LevelGenerator(this, _objectPool, _stickManager, _dataHolder.settings, _matchController);
     }
 
     [Inject]

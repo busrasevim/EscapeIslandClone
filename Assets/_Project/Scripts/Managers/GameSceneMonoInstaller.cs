@@ -21,5 +21,6 @@ public class GameSceneMonoInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<LevelManager>().AsSingle();
         Container.BindInterfacesAndSelfTo<StickManager>().AsSingle();
         Container.BindInterfacesAndSelfTo<GameManager>().AsSingle();
+        Container.Bind<MatchController>().AsSingle();
     }
 }

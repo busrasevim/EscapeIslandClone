@@ -115,6 +115,9 @@ public class StickManager: IInitializable
                 _stickGroup[i].transform.SetParent(_currentSlotGroup.currentIsland.transform);
                 _stickGroup[i].GoNewPlace(_currentSlotGroup.slotPositions[i], _currentSlotGroup);
             }
+
+            group.currentGroup = this;
+            group.slotColor = _stickGroupColor;
         }
         public void ActivateSticks()
         {

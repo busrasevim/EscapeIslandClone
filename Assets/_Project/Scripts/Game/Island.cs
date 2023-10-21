@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Lean.Common;
 using UnityEngine;
-using Zenject;
 
 public class Island : LeanSelectableBehaviour
 {
@@ -11,12 +9,15 @@ public class Island : LeanSelectableBehaviour
     [SerializeField] private Transform rightBorder;
     [SerializeField] private Transform behindBorder;
     [SerializeField] private Transform frontBorder;
+    private MatchController _matchController;
 
     [Serializable]
-    public struct SlotGroup
+    public class SlotGroup
     {
         public List<Vector3> slotPositions;
         public Island currentIsland;
+        public Color slotColor;
+        public StickManager.StickGroup currentGroup;
 
         public SlotGroup(int slotStickCount, int slotNumber, Island island)
         {
@@ -33,14 +34,14 @@ public class Island : LeanSelectableBehaviour
                 var newPosition = new Vector3(newPositionX, 0f, slotZPosition);
                 slotPositions.Add(newPosition);
             }
-            
         }
     }
 
-    private List<SlotGroup> _slots = new List<SlotGroup>();
+    private List<SlotGroup> _slots;
     private Stack<SlotGroup> _emptySlots;
+    private Stack<SlotGroup> _filledSlots;
 
-    public void Initialize(GameSettings settings)
+    public void Initialize(GameSettings settings, MatchController controller)
     {
         _slots = new List<SlotGroup>();
         
@@ -57,6 +58,10 @@ public class Island : LeanSelectableBehaviour
         {
             _emptySlots.Push(_slots[i]);
         }
+
+        _filledSlots = new Stack<SlotGroup>();
+
+        _matchController = controller;
     }
 
     public bool TryGetEmptySlotGroup(out SlotGroup group)
@@ -68,6 +73,7 @@ public class Island : LeanSelectableBehaviour
         }
 
         group = _emptySlots.Pop();
+        _filledSlots.Push(group);
         
         return true;
     }
@@ -75,6 +81,67 @@ public class Island : LeanSelectableBehaviour
     public void SetSlotEmpty(SlotGroup group)
     {
         _emptySlots.Push(group);
+        _filledSlots.Pop();
+    }
+
+    public List<StickManager.StickGroup> GetAvailableGroups(int emptySlotCountOfOtherIsland)
+    {
+        var color = GetFirstColor();
+        var groupList = new List<StickManager.StickGroup>();
+        for (int i = 0; i < emptySlotCountOfOtherIsland; i++)
+        {
+            if(_filledSlots.Count==0) break;
+            var slot = _filledSlots.Peek();
+            if (slot.slotColor == color)
+            {
+                groupList.Add(slot.currentGroup);
+                SetSlotEmpty(slot);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return groupList;
+    }
+    
+    public void GroupTransition(List<StickManager.StickGroup> groups)
+    {
+        foreach (var group in groups)
+        {
+            var slot = _emptySlots.Pop();
+            _filledSlots.Push(slot);
+            group.ChangeGroupPosition(slot);
+        }
+    }
+
+    public int GetEmptySlotCount()
+    {
+        return _emptySlots.Count;
+    }
+    
+    private bool IsThereEmptySlot()
+    {
+        return _emptySlots.Count > 0;
+    }
+
+    public bool IsIslandEmpty()
+    {
+        return _filledSlots.Count == 0;
+    }
+
+    public bool IsIslandOkay(Island selectedIsland)
+    {
+        if (IsIslandEmpty())
+            return true;
+
+        return selectedIsland.GetFirstColor() == GetFirstColor() && IsThereEmptySlot();
+    }
+
+    private Color GetFirstColor()
+    {
+        return _filledSlots.Peek().slotColor;
     }
 
     public void Activate()
@@ -90,6 +157,7 @@ public class Island : LeanSelectableBehaviour
     protected override void OnSelected(LeanSelect select)
     {
         transform.position += Vector3.up * 0.2f;
+        _matchController.SelectIsland(this);
     }
 
     protected override void OnDeselected(LeanSelect select)

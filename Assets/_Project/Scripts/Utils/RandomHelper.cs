@@ -153,13 +153,11 @@ public class RandomWeightedElementSelector<T>
     
     public static void Shuffle<T>(IList<T> list)
     {
-        int n = list.Count;
+        var n = list.Count;
         for (int i = n - 1; i > 0; i--)
         {
-            int j = Random.Range(0, i + 1);
-            T temp = list[i];
-            list[i] = list[j];
-            list[j] = temp;
+            var j = Random.Range(0, i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
         }
     }
 }
