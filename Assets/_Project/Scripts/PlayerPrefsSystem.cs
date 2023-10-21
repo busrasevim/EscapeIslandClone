@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerPrefsSystem : ISaveSystem
@@ -11,19 +9,41 @@ public class PlayerPrefsSystem : ISaveSystem
 
     public bool Save<T>(string key, T data)
     {
-        if (data is int value)
+        switch (data)
         {
-            PlayerPrefs.SetInt(key, value);
-            return true;
+            case int valueI:
+                PlayerPrefs.SetInt(key, valueI);
+                return true;
+            case string valueS:
+                PlayerPrefs.SetString(key, valueS);
+                return true;
+            case float valueF:
+                PlayerPrefs.SetFloat(key, valueF);
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     public bool TryGet<T>(string key, out T data)
     {
         if (typeof(T) == typeof(int))
         {
-            int value = PlayerPrefs.GetInt(key);
+            var value = PlayerPrefs.GetInt(key);
+            data = (T)(object)value;
+            return true;
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            var value = PlayerPrefs.GetString(key);
+            data = (T)(object)value;
+            return true;
+        }
+
+        if (typeof(T) == typeof(float))
+        {
+            var value = PlayerPrefs.GetFloat(key);
             data = (T)(object)value;
             return true;
         }
