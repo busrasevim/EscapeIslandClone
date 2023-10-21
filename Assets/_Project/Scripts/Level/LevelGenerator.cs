@@ -14,6 +14,9 @@ public class LevelGenerator
     private GameSettings _settings;
     private MatchController _matchController;
 
+    private int _currentLevelIslandCount;
+    private int _currentLevelColorCount;
+
     public LevelGenerator(LevelManager levelManager, ObjectPool pool, StickManager stickManager, GameSettings settings,MatchController controller)
     {
         _levelManager = levelManager;
@@ -38,8 +41,9 @@ public class LevelGenerator
 
     public void GenerateLevel()
     {
+        SetLevelIslandAndColorCount(_levelManager.CurrentLevelNo);
         GenerateIslands();
-        _stickManager.GenerateSticks(3);
+        _stickManager.GenerateSticks(_currentLevelColorCount);
         
         var sticks = _stickManager.GetLevelSticks();
         var islandIndex = 0;
@@ -77,10 +81,45 @@ public class LevelGenerator
             _islands.Add(island);
         }
 
-        _levelIslands = _islands.GetRandomElements(5);
+        _levelIslands = _islands.GetRandomElements(_currentLevelIslandCount);
         foreach (var island in _levelIslands)
         {
             island.Activate();
+        }
+    }
+
+    private void SetLevelIslandAndColorCount(int currentLevelNumber)
+    {
+        if (currentLevelNumber < 3)
+        {
+            _currentLevelColorCount = 2;
+            _currentLevelIslandCount = 3;
+        }else if (currentLevelNumber < 6)
+        {
+            _currentLevelColorCount = 3;
+            _currentLevelIslandCount = 5;
+        }else if (currentLevelNumber < 10)
+        {
+            _currentLevelColorCount = 4;
+            _currentLevelIslandCount = 6;
+        }else if (currentLevelNumber < 17)
+        {
+            _currentLevelColorCount = 5;
+            _currentLevelIslandCount = 8;
+        }else if (currentLevelNumber < 22)
+        {
+            _currentLevelColorCount = 5;
+            _currentLevelIslandCount = 7;
+        }
+        else if(currentLevelNumber<32)
+        {
+            _currentLevelColorCount = 6;
+            _currentLevelIslandCount = 9;
+        }
+        else
+        {
+            _currentLevelColorCount = 7;
+            _currentLevelIslandCount = 9;
         }
     }
 }
