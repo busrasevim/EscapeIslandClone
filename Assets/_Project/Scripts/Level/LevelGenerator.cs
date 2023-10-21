@@ -47,6 +47,8 @@ public class LevelGenerator
 
     public void GenerateLevel()
     {
+        var state = Random.state;
+        Random.InitState(_levelManager.CurrentLevelNo);
         SetLevelIslandAndColorCount(_levelManager.CurrentLevelNo);
         GenerateLevelIslands();
         _stickManager.GenerateSticks(_currentLevelColorCount);
@@ -71,6 +73,7 @@ public class LevelGenerator
             }
         }
 
+        Random.state = state;
         Debug.Log("Level is generated.");
     }
 
