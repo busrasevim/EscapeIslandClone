@@ -11,6 +11,12 @@ public class MatchController
 
     public void SelectIsland(Island island)
     {
+        if (_selectedIsland == island)
+        {
+            DeselectAll();
+            return;
+        }
+        
         if (_selectedIsland && !_selectedIsland.IsIslandEmpty())
         {
             if (island.IsIslandOkay(_selectedIsland))

@@ -29,6 +29,11 @@ public class LineManager : IInitializable
         positions[4] = toIsland.position + toIsland.forward * 0.5f;
         positions[5] = toIsland.position;
 
+        for (int i = 0; i < positions.Length; i++)
+        {
+            positions[i].y = -0.1f;
+        }
+        
         var line = _lineQueue.Dequeue();
         line.PrepareToGame(positions);
         return line;

@@ -32,7 +32,7 @@ public class LevelGenerator
         {
             for (int j = 0; j < 2; j++)
             {
-                var position = new Vector3(j * 4, 0f, i * 1.2f);
+                var position = new Vector3(j * 4, 0f, i * 1.5f);
                 _islandPositions[i * 2 + j] = position;
             }
         }
@@ -177,7 +177,7 @@ public class LevelGenerator
     {
         var numberOfIslands = _settings.bonusLevelIslandCount;
         var unitAngle = 360f / numberOfIslands;
-        var radius = 2f;
+        var radius = 2.4f;
         _bonusLevelIslandPositions = new Vector3[numberOfIslands];
         for (int i = 0; i < numberOfIslands; i++)
         {
