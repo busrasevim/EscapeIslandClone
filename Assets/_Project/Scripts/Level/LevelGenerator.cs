@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using Zenject;
 
 public class LevelGenerator
 {
@@ -89,7 +86,7 @@ public class LevelGenerator
             island.Deactivate();
             _islands.Add(island);
         }
-        
+
         _matchController.SetIslands(_islands.ToArray());
     }
 
@@ -132,43 +129,39 @@ public class LevelGenerator
         {
             FixIslandPositions();
         }
-        
+
         _isBonusLevel = false;
-        
-        if (currentLevelNumber < 3)
+
+        switch (currentLevelNumber)
         {
-            _currentLevelColorCount = 2;
-            _currentLevelIslandCount = 3;
-        }
-        else if (currentLevelNumber < 6)
-        {
-            _currentLevelColorCount = 3;
-            _currentLevelIslandCount = 5;
-        }
-        else if (currentLevelNumber < 10)
-        {
-            _currentLevelColorCount = 4;
-            _currentLevelIslandCount = 6;
-        }
-        else if (currentLevelNumber < 17)
-        {
-            _currentLevelColorCount = 5;
-            _currentLevelIslandCount = 8;
-        }
-        else if (currentLevelNumber < 22)
-        {
-            _currentLevelColorCount = 5;
-            _currentLevelIslandCount = 7;
-        }
-        else if (currentLevelNumber < 32)
-        {
-            _currentLevelColorCount = 6;
-            _currentLevelIslandCount = 9;
-        }
-        else
-        {
-            _currentLevelColorCount = 7;
-            _currentLevelIslandCount = 9;
+            case < 2:
+                _currentLevelColorCount = 2;
+                _currentLevelIslandCount = 3;
+                break;
+            case < 4:
+                _currentLevelColorCount = 3;
+                _currentLevelIslandCount = 5;
+                break;
+            case < 8:
+                _currentLevelColorCount = 4;
+                _currentLevelIslandCount = 6;
+                break;
+            case < 15:
+                _currentLevelColorCount = 5;
+                _currentLevelIslandCount = 8;
+                break;
+            case < 22:
+                _currentLevelColorCount = 5;
+                _currentLevelIslandCount = 7;
+                break;
+            case < 32:
+                _currentLevelColorCount = 6;
+                _currentLevelIslandCount = 9;
+                break;
+            default:
+                _currentLevelColorCount = 7;
+                _currentLevelIslandCount = 9;
+                break;
         }
     }
 
