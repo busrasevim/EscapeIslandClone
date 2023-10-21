@@ -9,6 +9,7 @@ public class LevelGenerator
     private LevelManager _levelManager;
     private ObjectPool _objectPool;
     private Vector3[] _islandPositions;
+    private Vector3[] _bonusLevelIslandPositions;
     private StickManager _stickManager;
     private List<Island> _islands;
     private List<Island> _levelIslands;
@@ -17,6 +18,7 @@ public class LevelGenerator
 
     private int _currentLevelIslandCount;
     private int _currentLevelColorCount;
+    private bool _isBonusLevel;
 
     public LevelGenerator(LevelManager levelManager, ObjectPool pool, StickManager stickManager, GameSettings settings,
         MatchController controller)
@@ -40,6 +42,7 @@ public class LevelGenerator
 
         _islands = new List<Island>();
         GenerateIslands();
+        SetBonusLevelIslandPositions();
     }
 
     public void GenerateLevel()
@@ -90,7 +93,7 @@ public class LevelGenerator
         var allIslands = new List<Island>();
         allIslands.AddRange(_islands);
         _levelIslands = new List<Island>();
-        
+
         for (int i = 0; i < _currentLevelIslandCount; i++)
         {
             var count = allIslands.Count;
@@ -99,10 +102,34 @@ public class LevelGenerator
             _levelIslands.Add(allIslands[index]);
             allIslands.RemoveAt(index);
         }
+
+        if (_isBonusLevel)
+        {
+            for (int i = 0; i < _levelIslands.Count; i++)
+            {
+                _levelIslands[i].transform.position = _bonusLevelIslandPositions[i];
+                _levelIslands[i].transform.LookAt(Vector3.zero);
+            }
+        }
     }
 
     private void SetLevelIslandAndColorCount(int currentLevelNumber)
     {
+        if (currentLevelNumber > 3 && currentLevelNumber % 3 == 0)
+        {
+            _isBonusLevel = true;
+            _currentLevelColorCount = 7;
+            _currentLevelIslandCount = 9;
+            return;
+        }
+
+        if (_isBonusLevel)
+        {
+            FixIslandPositions();
+        }
+        
+        _isBonusLevel = false;
+        
         if (currentLevelNumber < 3)
         {
             _currentLevelColorCount = 2;
@@ -137,6 +164,34 @@ public class LevelGenerator
         {
             _currentLevelColorCount = 7;
             _currentLevelIslandCount = 9;
+        }
+    }
+
+    private void FixIslandPositions()
+    {
+        for (int i = 0; i < _islands.Count; i++)
+        {
+            _islands[i].transform.position = _islandPositions[i];
+        }
+    }
+
+    private void SetBonusLevelIslandPositions()
+    {
+        var numberOfIslands = _settings.bonusLevelIslandCount;
+        var unitAngle = 360f / numberOfIslands;
+        var radius = 2f;
+        _bonusLevelIslandPositions = new Vector3[numberOfIslands];
+        for (int i = 0; i < numberOfIslands; i++)
+        {
+            var angle = i * unitAngle;
+            var radians = Mathf.Deg2Rad * angle;
+
+            var x = radius * Mathf.Cos(radians);
+            var z = radius * Mathf.Sin(radians);
+
+            var position = new Vector3(x, 0, z);
+
+            _bonusLevelIslandPositions[i] = position;
         }
     }
 }

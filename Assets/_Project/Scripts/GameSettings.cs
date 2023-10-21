@@ -7,5 +7,6 @@ using Zenject;
 public class GameSettings : ScriptableObject
 {
     public int slotStickCount;
+    public int bonusLevelIslandCount;
     public Color[] stickColors;
 }
