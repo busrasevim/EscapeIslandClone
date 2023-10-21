@@ -59,14 +59,14 @@ public class LevelGenerator
 
             if (_levelIslands[islandIndex].TryGetEmptySlotGroup(out group))
             {
-                sticks[i].ChangeGroupPosition(group);
+                sticks[i].SetGroupPosition(group);
             }
             else
             {
                 islandIndex++;
                 if (_levelIslands[islandIndex].TryGetEmptySlotGroup(out group))
                 {
-                    sticks[i].ChangeGroupPosition(group);
+                    sticks[i].SetGroupPosition(group);
                 }
             }
         }
@@ -86,6 +86,8 @@ public class LevelGenerator
             island.Deactivate();
             _islands.Add(island);
         }
+        
+        _matchController.SetIslands(_islands.ToArray());
     }
 
     private void GenerateLevelIslands()
@@ -115,7 +117,7 @@ public class LevelGenerator
 
     private void SetLevelIslandAndColorCount(int currentLevelNumber)
     {
-        if (currentLevelNumber > 3 && currentLevelNumber % 3 == 0)
+        if (currentLevelNumber > 3 && currentLevelNumber % 3 == 0 || true)
         {
             _isBonusLevel = true;
             _currentLevelColorCount = 7;

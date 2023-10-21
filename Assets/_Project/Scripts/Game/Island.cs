@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using Lean.Common;
+using Lean.Touch;
 using UnityEngine;
 
 public class Island : LeanSelectableBehaviour
@@ -9,7 +11,10 @@ public class Island : LeanSelectableBehaviour
     [SerializeField] private Transform rightBorder;
     [SerializeField] private Transform behindBorder;
     [SerializeField] private Transform frontBorder;
+    [SerializeField] private LeanSelectableByFinger leanSelectable;
     private MatchController _matchController;
+    private float _islandStartYPosition;
+    private Tween _selectedTween;
 
     [Serializable]
     public class SlotGroup
@@ -62,8 +67,9 @@ public class Island : LeanSelectableBehaviour
         _filledSlots = new Stack<SlotGroup>();
 
         _matchController = controller;
+        _islandStartYPosition = transform.position.y;
     }
-
+    
     public bool TryGetEmptySlotGroup(out SlotGroup group)
     {
         if (_emptySlots.Count == 0)
@@ -106,13 +112,13 @@ public class Island : LeanSelectableBehaviour
         return groupList;
     }
     
-    public void GroupTransition(List<StickManager.StickGroup> groups)
+    public void GroupTransition(List<StickManager.StickGroup> groups, Line line)
     {
         foreach (var group in groups)
         {
             var slot = _emptySlots.Pop();
             _filledSlots.Push(slot);
-            group.ChangeGroupPosition(slot);
+            group.ChangeGroupPosition(slot, line);
         }
     }
 
@@ -154,14 +160,21 @@ public class Island : LeanSelectableBehaviour
         gameObject.SetActive(false);
     }
 
+    public void Deselect()
+    {
+        leanSelectable.Deselect();
+    }
+
     protected override void OnSelected(LeanSelect select)
     {
-        transform.position += Vector3.up * 0.2f;
+        _selectedTween?.Kill();
+        _selectedTween = transform.DOMoveY(_islandStartYPosition + 0.2f, 0.1f);
         _matchController.SelectIsland(this);
     }
 
     protected override void OnDeselected(LeanSelect select)
     {
-        transform.position -= Vector3.up * 0.2f;
+        _selectedTween?.Kill();
+        _selectedTween = transform.DOMoveY(_islandStartYPosition, 0.1f);
     }
 }

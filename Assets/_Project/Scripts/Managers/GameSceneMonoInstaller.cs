@@ -15,6 +15,7 @@ public class GameSceneMonoInstaller : MonoInstaller
         Container.Bind<IInputHandler>().To<MobileInputHandler>().FromComponentInNewPrefab(inputHandlerObject).AsSingle();
         Container.BindInterfacesAndSelfTo<DataManager>().AsSingle();
         Container.Bind<ObjectPool>().FromComponentInNewPrefab(objectPoolObject).AsSingle();
+        Container.BindInterfacesAndSelfTo<LineManager>().AsSingle();
         Container.Bind<DataHolder>().FromComponentInNewPrefab(dataHolderObject).AsSingle();
         Container.BindInterfacesAndSelfTo<MainStateMachine>().AsSingle();
         Container.BindInterfacesAndSelfTo<UIStateMachine>().AsSingle();

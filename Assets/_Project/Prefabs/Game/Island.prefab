@@ -253,7 +253,7 @@ MonoBehaviour:
   rightBorder: {fileID: 4945799466635006214}
   behindBorder: {fileID: 6602175585877264739}
   frontBorder: {fileID: 7514934675443369662}
-  settings: {fileID: 11400000, guid: da79c7f2f2051de4997951675396f0e0, type: 2}
+  leanSelectable: {fileID: 1136021452291052594}
 --- !u!65 &6489298689555455961
 BoxCollider:
   m_ObjectHideFlags: 0

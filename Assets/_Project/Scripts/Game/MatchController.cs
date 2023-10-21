@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class MatchController
 {
     private Island _selectedIsland;
+    private Island[] _allIslands;
+    [Inject] private LineManager _lineManager;
 
     public void SelectIsland(Island island)
     {
@@ -12,10 +15,10 @@ public class MatchController
         {
             if (island.IsIslandOkay(_selectedIsland))
             {
-                //pre deki o renge ait hepsi yeni island a gidecek
                 var emptySlotCount = island.GetEmptySlotCount();
                 var groups = _selectedIsland.GetAvailableGroups(emptySlotCount);
-                island.GroupTransition(groups);
+                var line = _lineManager.SetLine(_selectedIsland.transform,island.transform);
+                island.GroupTransition(groups, line);
             }
             
             DeselectAll();
@@ -26,8 +29,17 @@ public class MatchController
         }
     }
 
+    public void SetIslands(Island[] allIslands)
+    {
+        _allIslands = allIslands;
+    }
+    
     public void DeselectAll()
     {
         _selectedIsland = null;
+        foreach (var island in _allIslands)
+        {
+            island.Deselect();
+        }
     }
 }

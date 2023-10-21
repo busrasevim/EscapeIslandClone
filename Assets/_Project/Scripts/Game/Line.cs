@@ -5,10 +5,18 @@ using UnityEngine;
 public class Line : MonoBehaviour
 {
     [SerializeField] private LineRenderer _lineRenderer;
+    private LineManager _lineManager;
 
+    public void Initialize(LineManager lineManager)
+    {
+        _lineManager = lineManager;
+        Deactivate();
+    }
+    
     public void PrepareToGame(Vector3[] positions)
     {
         SetPositions(positions);
+        gameObject.SetActive(true);
     }
     
     private void SetPositions(Vector3[] positions)
@@ -17,5 +25,18 @@ public class Line : MonoBehaviour
         {
             _lineRenderer.SetPosition(i,positions[i]);
         }
+    }
+
+    public void Deactivate()
+    {
+        gameObject.SetActive(false);
+        _lineManager.GetUsedLine(this);
+    }
+
+    public Vector3[] GetPositions()
+    {
+        Vector3[] linePoints = new Vector3[_lineRenderer.positionCount];
+        _lineRenderer.GetPositions(linePoints);
+        return linePoints;
     }
 }

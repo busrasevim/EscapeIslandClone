@@ -107,13 +107,26 @@ public class StickManager: IInitializable
             }
         }
 
-        public void ChangeGroupPosition(Island.SlotGroup group)
+        public void SetGroupPosition(Island.SlotGroup group)
         {
             _currentSlotGroup = group;
             for (int i = 0; i < _stickGroup.Count; i++)
             {
                 _stickGroup[i].transform.SetParent(_currentSlotGroup.currentIsland.transform);
-                _stickGroup[i].GoNewPlace(_currentSlotGroup.slotPositions[i], _currentSlotGroup);
+                _stickGroup[i].transform.localPosition = _currentSlotGroup.slotPositions[i];
+            }
+
+            group.currentGroup = this;
+            group.slotColor = _stickGroupColor;
+        }
+        
+        public void ChangeGroupPosition(Island.SlotGroup group, Line line)
+        {
+            _currentSlotGroup = group;
+            for (int i = 0; i < _stickGroup.Count; i++)
+            {
+                _stickGroup[i].transform.SetParent(_currentSlotGroup.currentIsland.transform);
+                _stickGroup[i].GoNewPlace(line, _currentSlotGroup.slotPositions[i], _currentSlotGroup);
             }
 
             group.currentGroup = this;
