@@ -57,11 +57,17 @@ public class LevelGenerator
         var islandIndex = 0;
 
         _levelIslands.Shuffle();
+        var tutorialFactor = 0;
         for (int i = 0; i < sticks.Count; i++)
         {
             Island.SlotGroup group = null;
 
-            if (_levelIslands[islandIndex].TryGetEmptySlotGroup(out group))
+            if (_levelManager.CurrentLevelNo == 0)
+            {
+                tutorialFactor = i % 2;
+            }
+            
+            if (_levelIslands[islandIndex+tutorialFactor].TryGetEmptySlotGroup(out group))
             {
                 sticks[i].SetGroupPosition(group);
             }
@@ -150,7 +156,11 @@ public class LevelGenerator
 
         switch (currentLevelNumber)
         {
-            case < 2:
+            case 0:
+                _currentLevelColorCount = 1;
+                _currentLevelIslandCount = 2;
+                break;
+            case 1:
                 _currentLevelColorCount = 2;
                 _currentLevelIslandCount = 3;
                 break;
