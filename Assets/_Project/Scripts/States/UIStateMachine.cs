@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Zenject;
 
 public class UIStateMachine : StateManager<UIStateMachine.UIState>
 {
@@ -15,6 +16,7 @@ public class UIStateMachine : StateManager<UIStateMachine.UIState>
     private StartUI _startUI;
     private InGameUI _inGameUI;
     private EndUI _endUI;
+    [Inject] private DataManager _dataManager;
     
     protected override void Init()
     {
@@ -30,7 +32,7 @@ public class UIStateMachine : StateManager<UIStateMachine.UIState>
 
     protected override void SetStates()
     {
-        var startUI = new StartUIState(UIState.Start, UIState.InGame, _startUI);
+        var startUI = new StartUIState(UIState.Start, UIState.InGame, _startUI,_dataManager);
         var inGameUI = new InGameUIState(UIState.InGame, UIState.LevelEnd, _inGameUI);
         var endUI = new LevelEndUIState(UIState.LevelEnd, UIState.Start, _endUI);
 
