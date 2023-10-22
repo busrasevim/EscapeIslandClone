@@ -19,7 +19,6 @@ public class StartUI : UIPanel
 
     public void PressedStartButton()
     {
-        Debug.Log("presseddd");
         StartLevel();
     }
 

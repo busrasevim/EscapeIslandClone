@@ -15,7 +15,6 @@ public class LineManager : IInitializable
         {
             var line = _objectPool.SpawnFromPool(PoolTags.Line, Vector3.zero, Quaternion.identity).GetComponent<Line>();
             line.Initialize(this);
-            _lineQueue.Enqueue(line);
         }
     }
 
@@ -33,7 +32,7 @@ public class LineManager : IInitializable
         {
             positions[i].y = -0.1f;
         }
-        
+
         var line = _lineQueue.Dequeue();
         line.PrepareToGame(positions);
         return line;
@@ -41,7 +40,8 @@ public class LineManager : IInitializable
 
     public void GetUsedLine(Line line)
     {
-        if (!_lineQueue.Contains(line))
-            _lineQueue.Enqueue(line);
+        if (_lineQueue.Contains(line)) return;
+
+        _lineQueue.Enqueue(line);
     }
 }

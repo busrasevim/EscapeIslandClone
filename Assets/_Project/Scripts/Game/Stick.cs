@@ -10,7 +10,6 @@ public class Stick : MonoBehaviour
     private Island.SlotGroup _currentSlotGroup;
     [SerializeField] private Animator animator;
     private static readonly int Run = Animator.StringToHash("Run");
-
     public void PrepareStick(Color color)
     {
         GetComponentInChildren<Renderer>().material.color = color;
@@ -61,13 +60,6 @@ public class Stick : MonoBehaviour
     {
         var targetIndex = 0;
         var targetPosition = roadPositions[targetIndex];
-
-       // var waitTime = index * 0.4f;
-        //if (waitTime > 0.3f)
-        {
-          //  transform.DOMoveY(0f, 0.3f);
-          //  direction = (targetPosition - new Vector3(transform.position.x,0f,transform.position.z)).normalized;
-        }
 
         yield return new WaitForSeconds(index * 0.5f);
         transform.SetParent(_currentSlotGroup.currentIsland.transform);

@@ -12,7 +12,6 @@ public class MainStateMachine : StateManager<MainStateMachine.MainState>
 
     protected override void Init()
     {
-        Debug.Log(_signalBus);
         _signalBus.Subscribe<OnLevelEndSignal>(OnLevelEnd);
         _signalBus.Subscribe<OnLevelStartSignal>(OnLevelStart);
     }
