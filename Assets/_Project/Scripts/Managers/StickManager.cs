@@ -66,6 +66,16 @@ public class StickManager: IInitializable
     {
         return _levelSticks;
     }
+
+    public void ResetSticks()
+    {
+        if(_levelSticks==null) return;
+        
+        foreach (var group in _levelSticks)
+        {
+            group.DeactivateSticks();
+        }
+    }
     
     private void GenerateLevelSticks(int colorCount)
     {

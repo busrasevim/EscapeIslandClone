@@ -11,6 +11,9 @@ public class GameSceneMonoInstaller : MonoInstaller
     {
         SignalBusInstaller.Install(Container);
         Container.DeclareSignal<OnLevelCompletedSignal>().OptionalSubscriber();
+        Container.DeclareSignal<OnLevelEndSignal>().OptionalSubscriber();
+        Container.DeclareSignal<OnLevelStartSignal>().OptionalSubscriber();
+        
         Container.Bind<ISaveSystem>().To<JsonSaveSystem>().AsSingle();
         Container.Bind<IInputHandler>().To<MobileInputHandler>().FromComponentInNewPrefab(inputHandlerObject).AsSingle();
         Container.BindInterfacesAndSelfTo<DataManager>().AsSingle();

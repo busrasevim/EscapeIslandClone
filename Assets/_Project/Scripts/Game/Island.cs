@@ -174,6 +174,18 @@ public class Island : LeanSelectableBehaviour
         leanSelectable.Deselect();
     }
 
+    public void Reset()
+    {
+        foreach (var slot in _filledSlots)
+        {
+            _emptySlots.Push(slot);
+        }
+        
+        _filledSlots.Clear();
+        
+        Deactivate();
+    }
+
     protected override void OnSelected(LeanSelect select)
     {
         _selectedTween?.Kill();

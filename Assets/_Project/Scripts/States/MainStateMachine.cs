@@ -1,6 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class MainStateMachine : StateManager<MainStateMachine.MainState>
@@ -12,6 +10,13 @@ public class MainStateMachine : StateManager<MainStateMachine.MainState>
         Finish,
     }
 
+    protected override void Init()
+    {
+        Debug.Log(_signalBus);
+        _signalBus.Subscribe<OnLevelEndSignal>(OnLevelEnd);
+        _signalBus.Subscribe<OnLevelStartSignal>(OnLevelStart);
+    }
+    
     protected override void SetStates()
     {
         var start = new StartGameState(MainState.Start, MainState.Game);
@@ -23,5 +28,15 @@ public class MainStateMachine : StateManager<MainStateMachine.MainState>
         States.Add(MainState.Finish,finish);
         
         SetStateWithKey(MainState.Start);
+    }
+
+    private void OnLevelEnd(OnLevelEndSignal args)
+    {
+        NextState();
+    }
+
+    private void OnLevelStart(OnLevelStartSignal args)
+    {
+        NextState();
     }
 }

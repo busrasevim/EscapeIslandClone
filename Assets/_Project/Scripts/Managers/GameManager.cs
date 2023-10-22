@@ -7,14 +7,13 @@ using Zenject;
 
 public class GameManager : IInitializable, IDisposable
 {
-    public event Action StartAction;
-    public event Action<bool> EndAction;
-
     [Inject] private ISaveSystem _saveSystem;
     [Inject] private MainStateMachine _mainStateMachine;
     [Inject] private UIStateMachine _uIStateMachine;
     [Inject] private LevelManager _levelManager;
     [Inject] private ObjectPool _objectPool;
+    
+    [Inject] private SignalBus _signalBus;
     private FXManager _fxManager;
 
     public void Initialize()
@@ -33,7 +32,7 @@ public class GameManager : IInitializable, IDisposable
 
         _levelManager.SetUpLevel();
 
-        //   _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.Start);
+        _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.Start);
     }
     
     private async void RestartLevelAfter(float delay)
@@ -53,7 +52,8 @@ public class GameManager : IInitializable, IDisposable
 
     public void StartLevel()
     {
-        StartAction?.Invoke();
+        
+        _signalBus.TryFire(new OnLevelStartSignal(_levelManager.CurrentLevelNo));
     }
 
     public void EndLevel(bool isWin)
@@ -63,12 +63,12 @@ public class GameManager : IInitializable, IDisposable
         if (isWin)
         {
             LevelCompleted();
-            EndAction?.Invoke(true);
+            _signalBus.TryFire(new OnLevelEndSignal(true));
             return;
         }
 
         LevelFailed();
-        EndAction?.Invoke(false);
+        _signalBus.TryFire(new OnLevelEndSignal(false));
     }
 
     private void LevelCompleted()
@@ -77,15 +77,33 @@ public class GameManager : IInitializable, IDisposable
 
       //  _fxManager.PlayLevelCompleteFX();
 
-        //    _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelCompleted);
         Debug.Log("Level completed.");
     }
 
     private void LevelFailed()
     {
-        // _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.LevelFailed);
         Debug.Log("Level failed.");
     }
 
     #endregion
+}
+
+public struct OnLevelEndSignal
+{
+    public readonly bool IsWin;
+
+    public OnLevelEndSignal(bool isWin)
+    {
+        IsWin = isWin;
+    }
+}
+
+public struct OnLevelStartSignal
+{
+    public readonly int StartingLevelIndex;
+
+    public OnLevelStartSignal(int startingLevelIndex)
+    {
+        StartingLevelIndex = startingLevelIndex;
+    }
 }

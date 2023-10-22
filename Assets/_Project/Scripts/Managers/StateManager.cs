@@ -9,39 +9,33 @@ public abstract class StateManager<EState> : IInitializable, ITickable where ESt
 
     protected BaseState<EState> CurrentState;
 
-    protected bool IsTransitioningState = false;
+    [Inject] protected SignalBus _signalBus;
 
     public void Initialize()
     {
+        Init();
         SetStates();
     }
 
     public void Tick()
     {
-        if (IsTransitioningState || CurrentState==null) return;
-
-        var nextStateKey = CurrentState.GetNextState();
-
-        if (nextStateKey.Equals(CurrentState.StateKey))
-        {
-            CurrentState.OnUpdate();
-        }
-        else
-        {
-            TransitionToState(nextStateKey);
-        }
+        CurrentState?.OnUpdate();
     }
 
-    public void TransitionToState(EState stateKey)
+    protected void TransitionToState(EState stateKey)
     {
-        IsTransitioningState = true;
+        if (CurrentState != null && CurrentState == States[stateKey])
+            return;
+
         CurrentState?.OnExit();
         CurrentState = States[stateKey];
         CurrentState.OnEnter();
-        IsTransitioningState = false;
+
+        Debug.Log("The state " + stateKey + typeof(EState) + " starts.");
     }
 
     protected abstract void SetStates();
+    protected abstract void Init();
 
     public void SetStateWithKey(EState stateKey)
     {

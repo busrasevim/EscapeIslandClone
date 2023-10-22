@@ -44,6 +44,8 @@ public class LevelGenerator
 
     public void GenerateLevel()
     {
+        ResetIslands();
+        _stickManager.ResetSticks();
         var state = Random.state;
         Random.InitState(_levelManager.CurrentLevelNo);
         SetLevelIslandAndColorCount(_levelManager.CurrentLevelNo);
@@ -74,6 +76,14 @@ public class LevelGenerator
         Debug.Log("Level is generated.");
     }
 
+    private void ResetIslands()
+    {
+        foreach (var island in _islands)
+        {
+            island.Reset();
+        }
+    }
+    
     private void GenerateIslands()
     {
         for (int i = 0; i < _islandPositions.Length; i++)
@@ -168,8 +178,10 @@ public class LevelGenerator
     private void FixIslandPositions()
     {
         for (int i = 0; i < _islands.Count; i++)
-        {
+        { 
+            var rotation = Quaternion.Euler(0f, i % 2 == 0 ? 90f : -90f, 0f);
             _islands[i].transform.position = _islandPositions[i];
+            _islands[i].transform.rotation = rotation;
         }
     }
 
