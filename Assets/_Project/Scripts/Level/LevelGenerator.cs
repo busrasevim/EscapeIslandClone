@@ -55,6 +55,8 @@ public class LevelGenerator
 
         var sticks = _stickManager.GetLevelSticks();
         var islandIndex = 0;
+
+        _levelIslands.Shuffle();
         for (int i = 0; i < sticks.Count; i++)
         {
             Island.SlotGroup group = null;
@@ -116,6 +118,8 @@ public class LevelGenerator
             allIslands.RemoveAt(index);
         }
 
+        _levelIslands.Shuffle();
+        
         if (_isBonusLevel)
         {
             for (int i = 0; i < _levelIslands.Count; i++)
@@ -124,6 +128,7 @@ public class LevelGenerator
                 _levelIslands[i].transform.LookAt(Vector3.zero);
             }
         }
+        
     }
 
     private void SetLevelIslandAndColorCount(int currentLevelNumber)
