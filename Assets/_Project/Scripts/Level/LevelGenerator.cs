@@ -12,19 +12,21 @@ public class LevelGenerator
     private List<Island> _levelIslands;
     private GameSettings _settings;
     private MatchController _matchController;
+    private LineManager _lineManager;
 
     private int _currentLevelIslandCount;
     private int _currentLevelColorCount;
     private bool _isBonusLevel;
 
     public LevelGenerator(LevelManager levelManager, ObjectPool pool, StickManager stickManager, GameSettings settings,
-        MatchController controller)
+        MatchController controller,LineManager lineManager)
     {
         _levelManager = levelManager;
         _objectPool = pool;
         _stickManager = stickManager;
         _settings = settings;
         _matchController = controller;
+        _lineManager = lineManager;
 
         _islandPositions = new Vector3[12];
 
@@ -32,7 +34,7 @@ public class LevelGenerator
         {
             for (int j = 0; j < 2; j++)
             {
-                var position = new Vector3(j * 4, 0f, i * 1.5f);
+                var position = new Vector3(j * 4 - 2, 0f, i * 1.5f);
                 _islandPositions[i * 2 + j] = position;
             }
         }
@@ -46,6 +48,8 @@ public class LevelGenerator
     {
         ResetIslands();
         _stickManager.ResetSticks();
+        _matchController.DeselectAll();
+        _lineManager.ResetLines();
         
         var state = Random.state;
         Random.InitState(_levelManager.CurrentLevelNo);
@@ -131,7 +135,7 @@ public class LevelGenerator
             for (int i = 0; i < _levelIslands.Count; i++)
             {
                 _levelIslands[i].transform.position = _bonusLevelIslandPositions[i];
-                _levelIslands[i].transform.LookAt(Vector3.zero);
+                _levelIslands[i].transform.LookAt(Vector3.forward*2.7f);
             }
         }
         
@@ -206,6 +210,8 @@ public class LevelGenerator
         var numberOfIslands = _settings.bonusLevelIslandCount;
         var unitAngle = 360f / numberOfIslands;
         var radius = 2.4f;
+        var zPlus = 2.7f;
+        
         _bonusLevelIslandPositions = new Vector3[numberOfIslands];
         for (int i = 0; i < numberOfIslands; i++)
         {
@@ -213,7 +219,7 @@ public class LevelGenerator
             var radians = Mathf.Deg2Rad * angle;
 
             var x = radius * Mathf.Cos(radians);
-            var z = radius * Mathf.Sin(radians);
+            var z = radius * Mathf.Sin(radians) + zPlus;
 
             var position = new Vector3(x, 0, z);
 

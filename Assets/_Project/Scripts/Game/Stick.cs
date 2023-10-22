@@ -14,6 +14,8 @@ public class Stick : MonoBehaviour
     private Vector3 _targetPosition;
     private bool _onRoad;
     private Vector3 _localIslandPosition;
+    private Line _currentMainLine;
+    private Coroutine _movementCoroutine;
     
     private static readonly int Run = Animator.StringToHash("Run");
     public void PrepareStick(Color color)
@@ -37,8 +39,13 @@ public class Stick : MonoBehaviour
         {
             _roadPositions.Clear();
             _roadPositions.Add(_targetPosition);
+            _currentMainLine.AddSiblingLine(line);
         }
-        
+        else
+        {
+            _currentMainLine = line;
+        }
+
         _roadPositions.AddRange(positions);
 
         if (_onRoad)
@@ -48,7 +55,7 @@ public class Stick : MonoBehaviour
         }
         _onRoad = true;
         
-        StartCoroutine(MoveToTargetIsland(index, () =>
+        _movementCoroutine = StartCoroutine(MoveToTargetIsland(index, () =>
         {
             transform.DOLocalMove(_localIslandPosition, 1f).OnComplete(() =>
             {
@@ -57,6 +64,8 @@ public class Stick : MonoBehaviour
                 transform.DORotate(_currentSlotGroup.currentIsland.transform.eulerAngles, 0.5f);
                 _onRoad = false;
             });
+
+            _movementCoroutine = null;
         }));
         
     }
@@ -116,5 +125,16 @@ public class Stick : MonoBehaviour
         }
 
         done.Invoke();
+    }
+
+    public void Reset()
+    {
+        if (_movementCoroutine != null)
+        {
+            StopCoroutine(_movementCoroutine);
+        }
+        Deactivate();
+        _roadPositions.Clear();
+        _onRoad = false;
     }
 }

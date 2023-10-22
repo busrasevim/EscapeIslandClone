@@ -6,10 +6,12 @@ public class Line : MonoBehaviour
 {
     [SerializeField] private LineRenderer _lineRenderer;
     private LineManager _lineManager;
+    private List<Line> _siblingLines;
 
     public void Initialize(LineManager lineManager)
     {
         _lineManager = lineManager;
+        _siblingLines = new List<Line>();
         Deactivate();
     }
     
@@ -31,6 +33,13 @@ public class Line : MonoBehaviour
     {
         gameObject.SetActive(false);
         _lineManager.GetUsedLine(this);
+
+        foreach (var line in _siblingLines)
+        {
+            line.Deactivate();
+        }
+        
+        _siblingLines.Clear();
     }
 
     public Vector3[] GetPositions()
@@ -38,5 +47,10 @@ public class Line : MonoBehaviour
         Vector3[] linePoints = new Vector3[_lineRenderer.positionCount];
         _lineRenderer.GetPositions(linePoints);
         return linePoints;
+    }
+
+    public void AddSiblingLine(Line line)
+    {
+        _siblingLines.Add(line);
     }
 }
