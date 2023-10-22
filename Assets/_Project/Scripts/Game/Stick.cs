@@ -22,7 +22,7 @@ public class Stick : MonoBehaviour
         _roadPositions = new List<Vector3>();
     }
 
-    public void GoNewPlace(Line line, Vector3 position, Island.SlotGroup group, int index)
+    public void GoNewPlace(Line line, Vector3 position, Island.SlotGroup group, int index, Action done)
     {
         _currentSlotGroup = group;
         var linePositions = line.GetPositions();
@@ -52,9 +52,9 @@ public class Stick : MonoBehaviour
         {
             transform.DOLocalMove(_localIslandPosition, 1f).OnComplete(() =>
             {
+                done.Invoke();
                 StopRunAnimation();
                 transform.DORotate(_currentSlotGroup.currentIsland.transform.eulerAngles, 0.5f);
-                line.Deactivate();
                 _onRoad = false;
             });
         }));
@@ -108,7 +108,6 @@ public class Stick : MonoBehaviour
 
                 _targetPosition = _roadPositions[0];
                 direction = (_targetPosition - transform.position).normalized;
-                Debug.Log(direction);
                 targetRotation=Quaternion.LookRotation(direction);
             }
 

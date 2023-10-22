@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -146,12 +147,21 @@ public class StickManager: IInitializable
             group.slotColor = _stickGroupColor;
         }
         
-        public void ChangeGroupPosition(Island.SlotGroup group, Line line, int groupIndex)
+        public void ChangeGroupPosition(Island.SlotGroup group, Line line, int groupIndex, Action done)
         {
             _currentSlotGroup = group;
+            var controlNumber = 0;
             for (int i = 0; i < _stickGroup.Count; i++)
             {
-                _stickGroup[i].GoNewPlace(line, _currentSlotGroup.slotPositions[i], _currentSlotGroup, i+groupIndex*_stickGroup.Count);
+                _stickGroup[i].GoNewPlace(line, _currentSlotGroup.slotPositions[i], _currentSlotGroup, i+groupIndex*_stickGroup.Count,
+                    () =>
+                    {
+                        controlNumber++;
+                        if (controlNumber == _stickGroup.Count)
+                        {
+                            done.Invoke();
+                        }
+                    });
             }
 
             group.currentGroup = this;

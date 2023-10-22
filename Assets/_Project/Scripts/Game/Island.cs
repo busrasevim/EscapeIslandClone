@@ -29,9 +29,11 @@ public class Island : LeanSelectableBehaviour
         {
             slotPositions = new List<Vector3>();
             currentIsland = island;
-            
-            var plusXValue = (currentIsland.rightBorder.localPosition.x - currentIsland.leftBorder.localPosition.x) / (slotStickCount - 1);
-            var plusZValue= (currentIsland.frontBorder.localPosition.z - currentIsland.behindBorder.localPosition.z) / (slotStickCount - 1);
+
+            var plusXValue = (currentIsland.rightBorder.localPosition.x - currentIsland.leftBorder.localPosition.x) /
+                             (slotStickCount - 1);
+            var plusZValue = (currentIsland.frontBorder.localPosition.z - currentIsland.behindBorder.localPosition.z) /
+                             (slotStickCount - 1);
 
             var slotZPosition = currentIsland.behindBorder.localPosition.z + slotNumber * plusZValue;
             for (int i = 0; i < slotStickCount; i++)
@@ -50,17 +52,17 @@ public class Island : LeanSelectableBehaviour
     public void Initialize(GameSettings settings, MatchController controller, StickManager stickManager)
     {
         _slots = new List<SlotGroup>();
-        
+
         var stickCount = settings.slotStickCount;
         for (int i = 0; i < stickCount; i++)
         {
             var slot = new SlotGroup(stickCount, i, this);
             _slots.Add(slot);
         }
-        
+
         _emptySlots = new Stack<SlotGroup>();
 
-        for (int i = stickCount-1; i >= 0; i--)
+        for (int i = stickCount - 1; i >= 0; i--)
         {
             _emptySlots.Push(_slots[i]);
         }
@@ -71,7 +73,7 @@ public class Island : LeanSelectableBehaviour
         _islandStartYPosition = transform.position.y;
         _stickManager = stickManager;
     }
-    
+
     public bool TryGetEmptySlotGroup(out SlotGroup group)
     {
         if (_emptySlots.Count == 0)
@@ -82,7 +84,7 @@ public class Island : LeanSelectableBehaviour
 
         group = _emptySlots.Pop();
         _filledSlots.Push(group);
-        
+
         return true;
     }
 
@@ -98,7 +100,7 @@ public class Island : LeanSelectableBehaviour
         var groupList = new List<StickManager.StickGroup>();
         for (int i = 0; i < emptySlotCountOfOtherIsland; i++)
         {
-            if(_filledSlots.Count==0) break;
+            if (_filledSlots.Count == 0) break;
             var slot = _filledSlots.Peek();
             if (slot.slotColor == color)
             {
@@ -113,14 +115,20 @@ public class Island : LeanSelectableBehaviour
 
         return groupList;
     }
-    
-    public void GroupTransition(List<StickManager.StickGroup> groups, Line line)
+
+    public void GroupTransition(List<StickManager.StickGroup> groups, Line line, Action done)
     {
+        var controlNumber = 0;
         for (int i = 0; i < groups.Count; i++)
         {
             var slot = _emptySlots.Pop();
             _filledSlots.Push(slot);
-            groups[i].ChangeGroupPosition(slot, line, i);
+            groups[i].ChangeGroupPosition(slot, line, i, () =>
+            {
+                controlNumber++;
+                if (controlNumber == groups.Count)
+                    done.Invoke();
+            });
         }
 
         if (IsIslandComplete())
@@ -134,7 +142,7 @@ public class Island : LeanSelectableBehaviour
     {
         return _emptySlots.Count;
     }
-    
+
     private bool IsThereEmptySlot()
     {
         return _emptySlots.Count > 0;
@@ -180,9 +188,9 @@ public class Island : LeanSelectableBehaviour
         {
             _emptySlots.Push(slot);
         }
-        
+
         _filledSlots.Clear();
-        
+
         Deactivate();
     }
 
@@ -202,7 +210,7 @@ public class Island : LeanSelectableBehaviour
     private bool IsIslandComplete()
     {
         if (_emptySlots.Count > 0) return false;
-        
+
         var color = GetFirstColor();
         foreach (var slot in _slots)
         {

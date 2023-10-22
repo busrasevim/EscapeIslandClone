@@ -24,7 +24,10 @@ public class MatchController
                 var emptySlotCount = island.GetEmptySlotCount();
                 var groups = _selectedIsland.GetAvailableGroups(emptySlotCount);
                 var line = _lineManager.SetLine(_selectedIsland.transform,island.transform);
-                island.GroupTransition(groups, line);
+                island.GroupTransition(groups, line, () =>
+                {
+                    line.Deactivate();
+                });
             }
             
             DeselectAll();
