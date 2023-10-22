@@ -116,11 +116,11 @@ public class Island : LeanSelectableBehaviour
     
     public void GroupTransition(List<StickManager.StickGroup> groups, Line line)
     {
-        foreach (var group in groups)
+        for (int i = 0; i < groups.Count; i++)
         {
             var slot = _emptySlots.Pop();
             _filledSlots.Push(slot);
-            group.ChangeGroupPosition(slot, line);
+            groups[i].ChangeGroupPosition(slot, line, i);
         }
 
         if (IsIslandComplete())

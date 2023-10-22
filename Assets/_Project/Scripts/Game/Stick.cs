@@ -16,7 +16,7 @@ public class Stick : MonoBehaviour
         GetComponentInChildren<Renderer>().material.color = color;
     }
 
-    public void GoNewPlace(Line line, Vector3 position, Island.SlotGroup group)
+    public void GoNewPlace(Line line, Vector3 position, Island.SlotGroup group, int index)
     {
         _currentSlotGroup = group;
         var linePositions = line.GetPositions();
@@ -26,8 +26,7 @@ public class Stick : MonoBehaviour
             positions[i] = linePositions[i + 1];
         }
 
-        PlayRunAnimation();
-        StartCoroutine(MoveToTargetIsland(positions, () =>
+        StartCoroutine(MoveToTargetIsland(positions, index, () =>
         {
             transform.DOLocalMove(position, 1f).OnComplete(() =>
             {
@@ -58,18 +57,30 @@ public class Stick : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    private IEnumerator MoveToTargetIsland(Vector3[] roadPositions, Action done)
+    private IEnumerator MoveToTargetIsland(Vector3[] roadPositions, int index, Action done)
     {
         var targetIndex = 0;
         var targetPosition = roadPositions[targetIndex];
-        var direction = (targetPosition - transform.position).normalized;
 
+       // var waitTime = index * 0.4f;
+        //if (waitTime > 0.3f)
+        {
+          //  transform.DOMoveY(0f, 0.3f);
+          //  direction = (targetPosition - new Vector3(transform.position.x,0f,transform.position.z)).normalized;
+        }
+
+        yield return new WaitForSeconds(index * 0.5f);
+        transform.SetParent(_currentSlotGroup.currentIsland.transform);
+        var direction = (targetPosition - transform.position).normalized;
+        var targetRotation = Quaternion.LookRotation(direction);
+        PlayRunAnimation();
         while (true)
         {
             if (Vector3.Distance(transform.position, targetPosition) > 0.025f)
             {
-                transform.position += direction * Time.deltaTime;
-                // transform.localPosition = Vector3.MoveTowards(transform.position, targetPosition, 0.1f * Time.deltaTime);
+                transform.position += direction * Time.deltaTime * 1.5f;
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation,  9f*Time.deltaTime);
+
             }
             else
             {
@@ -80,7 +91,8 @@ public class Stick : MonoBehaviour
                 }
 
                 targetPosition = roadPositions[targetIndex];
-                direction = targetPosition - transform.position;
+                direction = (targetPosition - transform.position).normalized;
+                targetRotation=Quaternion.LookRotation(direction);
             }
 
             yield return null;

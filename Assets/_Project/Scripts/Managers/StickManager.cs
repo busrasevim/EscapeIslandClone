@@ -146,13 +146,12 @@ public class StickManager: IInitializable
             group.slotColor = _stickGroupColor;
         }
         
-        public void ChangeGroupPosition(Island.SlotGroup group, Line line)
+        public void ChangeGroupPosition(Island.SlotGroup group, Line line, int groupIndex)
         {
             _currentSlotGroup = group;
             for (int i = 0; i < _stickGroup.Count; i++)
             {
-                _stickGroup[i].transform.SetParent(_currentSlotGroup.currentIsland.transform);
-                _stickGroup[i].GoNewPlace(line, _currentSlotGroup.slotPositions[i], _currentSlotGroup);
+                _stickGroup[i].GoNewPlace(line, _currentSlotGroup.slotPositions[i], _currentSlotGroup, i+groupIndex*_stickGroup.Count);
             }
 
             group.currentGroup = this;

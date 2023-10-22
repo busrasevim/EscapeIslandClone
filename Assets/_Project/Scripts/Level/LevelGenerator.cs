@@ -46,6 +46,7 @@ public class LevelGenerator
     {
         ResetIslands();
         _stickManager.ResetSticks();
+        
         var state = Random.state;
         Random.InitState(_levelManager.CurrentLevelNo);
         SetLevelIslandAndColorCount(_levelManager.CurrentLevelNo);
