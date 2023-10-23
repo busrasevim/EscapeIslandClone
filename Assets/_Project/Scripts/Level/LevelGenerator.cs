@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using _Project.Scripts.Data;
 using _Project.Scripts.Game;
@@ -5,6 +6,7 @@ using _Project.Scripts.Game.Interfaces;
 using _Project.Scripts.Pools;
 using _Project.Scripts.Utils;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace _Project.Scripts.Level
 {
@@ -83,6 +85,8 @@ namespace _Project.Scripts.Level
             }
 
             Random.state = state;
+
+            ControlIslands();
             Debug.Log("Level is generated.");
         }
 
@@ -117,7 +121,7 @@ namespace _Project.Scripts.Level
 
             _matchController.SetIslands(_islands.ToArray());
         }
-        
+
         //generating islands which is used on level
         private void GenerateLevelIslands()
         {
@@ -225,6 +229,7 @@ namespace _Project.Scripts.Level
                 }
             }
         }
+
         //Set circle positions
         private void SetBonusLevelIslandPositions()
         {
@@ -245,6 +250,24 @@ namespace _Project.Scripts.Level
                 var position = new Vector3(x, 0, z);
 
                 _bonusLevelIslandPositions[i] = position;
+            }
+        }
+
+        private void ControlIslands()
+        {
+            for (int i = 0; i < _levelIslands.Count; i++)
+            {
+                if (!_levelIslands[i].IsIslandComplete()) continue;
+                for (int j = 0; j < _levelIslands.Count; j++)
+                {
+                    if (i == j || !_levelIslands[j].IsIslandOkayForMatch(_levelIslands[i].GetFirstGroupColor()))
+                        continue;
+                    var emptySlotCount = _levelIslands[j].GetEmptySlotGroupCount();
+                    var stickGroups = _levelIslands[i].GetAvailableStickGroups(Math.Min(2, emptySlotCount));
+
+                    _levelIslands[j].StickGroupTransition(stickGroups, null);
+                    break;
+                }
             }
         }
     }

@@ -16,7 +16,7 @@ namespace _Project.Scripts.Game
         [SerializeField] internal Transform behindBorder;
         [SerializeField] internal Transform frontBorder;
         [SerializeField] private LeanSelectableByFinger leanSelectable;
-        
+
         private float _islandStartYPosition;
         private Tween _selectedTween;
         private List<SlotGroup> _slotGroups;
@@ -24,7 +24,7 @@ namespace _Project.Scripts.Game
         private Stack<SlotGroup> _filledSlotGroups;
         private int _slotStickCount;
         private List<Stick> _onRoadSticks;
-        
+
         private StickManager _stickManager;
         private IMatchController _matchController;
 
@@ -42,12 +42,12 @@ namespace _Project.Scripts.Game
                 var slot = new SlotGroup(_slotStickCount, i, this);
                 _slotGroups.Add(slot);
             }
-            
+
             for (int i = _slotStickCount - 1; i >= 0; i--)
             {
                 _emptySlotGroups.Push(_slotGroups[i]);
             }
-            
+
             _islandStartYPosition = transform.position.y;
             _stickManager = stickManager;
             _matchController = matchController;
@@ -66,7 +66,7 @@ namespace _Project.Scripts.Game
 
             return true;
         }
-        
+
         public List<StickGroup> GetAvailableStickGroups(int emptySlotCountOfOtherIsland)
         {
             var color = GetFirstGroupColor();
@@ -74,7 +74,7 @@ namespace _Project.Scripts.Game
             for (int i = 0; i < emptySlotCountOfOtherIsland; i++)
             {
                 if (_filledSlotGroups.Count == 0) break;
-                
+
                 var slotGroup = _filledSlotGroups.Peek();
                 if (slotGroup.GetSlotGroupColor() == color)
                 {
@@ -97,7 +97,14 @@ namespace _Project.Scripts.Game
             {
                 var slotGroup = _emptySlotGroups.Pop();
                 _filledSlotGroups.Push(slotGroup);
-                stickGroups[i].ChangeGroupPosition(slotGroup, roadLine, i, allTransitionStickCount);
+                if (roadLine == null)
+                {
+                    stickGroups[i].SetGroupPosition(slotGroup);
+                }
+                else
+                {
+                    stickGroups[i].ChangeGroupPosition(slotGroup, roadLine, i, allTransitionStickCount);
+                }
             }
         }
 
@@ -115,12 +122,12 @@ namespace _Project.Scripts.Game
         {
             return _filledSlotGroups.Count == 0;
         }
-        
+
         public Color GetFirstGroupColor()
         {
             return _filledSlotGroups.Peek().CurrentStickGroup.GetGroupColor();
         }
-        
+
         public bool IsIslandOkayForMatch(Color otherIslandColor)
         {
             if (IsIslandEmpty())
@@ -158,12 +165,20 @@ namespace _Project.Scripts.Game
             Deactivate();
         }
 
+        public bool IsIslandComplete()
+        {
+            if (_emptySlotGroups.Count > 0) return false;
+
+            var color = GetFirstGroupColor();
+            return _slotGroups.All(slot => slot.GetSlotGroupColor() == color);
+        }
+
         public void CompleteControl()
         {
             if (IsIslandComplete())
             {
                 leanSelectable.enabled = false;
-                _stickManager.CompleteColor(GetFirstGroupColor(),transform);
+                _stickManager.CompleteColor(GetFirstGroupColor(), transform);
             }
         }
 
@@ -180,7 +195,7 @@ namespace _Project.Scripts.Game
                 CompleteControl();
             }
         }
-        
+
         protected override void OnSelected(LeanSelect select)
         {
             _selectedTween?.Kill();
@@ -198,15 +213,6 @@ namespace _Project.Scripts.Game
         {
             _emptySlotGroups.Push(slotGroup);
             _filledSlotGroups.Pop();
-        }
-        
-        
-        private bool IsIslandComplete()
-        {
-            if (_emptySlotGroups.Count > 0) return false;
-
-            var color = GetFirstGroupColor();
-            return _slotGroups.All(slot => slot.GetSlotGroupColor() == color);
         }
     }
 }
