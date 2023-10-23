@@ -1,19 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public abstract class UIPanel : MonoBehaviour
+namespace _Project.Scripts.UI
 {
-    [SerializeField] protected CanvasGroup canvasGroup;
-
-    public abstract void Show(float buttonDelay = 0);
-
-    public abstract void Hide();
-
-    public virtual IEnumerator ShowAfterSeconds(float delay)
+    public abstract class UIPanel : MonoBehaviour
     {
-        yield return new WaitForSeconds(delay);
-        
-        Show();
+        [SerializeField] protected CanvasGroup canvasGroup;
+
+        public abstract void Show(float buttonDelay = 0);
+
+        public abstract void Hide();
+    
+        public virtual async UniTask ShowAfterSeconds(float delay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(delay));
+            Show();
+        }
     }
 }

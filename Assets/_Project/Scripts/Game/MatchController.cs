@@ -1,56 +1,55 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using _Project.Scripts.Game.Interfaces;
 using Zenject;
 
-public class MatchController
+namespace _Project.Scripts.Game
 {
-    private Island _selectedIsland;
-    private Island[] _allIslands;
-    [Inject] private LineManager _lineManager;
-
-    public void SelectIsland(Island island)
+    public class MatchController : IMatchController
     {
-        if (_selectedIsland == island)
+        private Island _selectedIsland;
+        private Island[] _allIslands;
+        [Inject] private LineManager _lineManager;
+
+        public void SelectIsland(Island island)
         {
-            DeselectAll();
-            return;
-        }
-        
-        if (_selectedIsland && !_selectedIsland.IsIslandEmpty())
-        {
-            if (island.IsIslandOkay(_selectedIsland))
+            if (_selectedIsland == island)
             {
-                var emptySlotCount = island.GetEmptySlotCount();
-                var groups = _selectedIsland.GetAvailableGroups(emptySlotCount);
-                var line = _lineManager.SetLine(_selectedIsland.transform,island.transform);
-                island.GroupTransition(groups, line, () =>
-                {
-                    line.Deactivate();
-                });
-            }
-            
-            DeselectAll();
-        }
-        else
-        {
-            _selectedIsland = island;
-            if(_selectedIsland.IsIslandEmpty())
                 DeselectAll();
-        }
-    }
+                return;
+            }
 
-    public void SetIslands(Island[] allIslands)
-    {
-        _allIslands = allIslands;
-    }
-    
-    public void DeselectAll()
-    {
-        _selectedIsland = null;
-        foreach (var island in _allIslands)
+            var isSelectedIslandValid = _selectedIsland && !_selectedIsland.IsIslandEmpty();
+            if (isSelectedIslandValid)
+            {
+                if (island.IsIslandOkayForMatch(_selectedIsland.GetFirstGroupColor()))
+                {
+                    var emptySlotGroupCount = island.GetEmptySlotGroupCount();
+                    var stickGroups = _selectedIsland.GetAvailableStickGroups(emptySlotGroupCount);
+                    var line = _lineManager.SetLine(_selectedIsland.transform,island.transform);
+                    island.StickGroupTransition(stickGroups, line);
+                }
+            
+                DeselectAll();
+            }
+            else
+            {
+                _selectedIsland = island;
+                if(_selectedIsland.IsIslandEmpty())
+                    DeselectAll();
+            }
+        }
+
+        public void SetIslands(Island[] allIslands)
         {
-            island.Deselect();
+            _allIslands = allIslands;
+        }
+    
+        public void DeselectAll()
+        {
+            _selectedIsland = null;
+            foreach (var island in _allIslands)
+            {
+                island.Deselect();
+            }
         }
     }
 }

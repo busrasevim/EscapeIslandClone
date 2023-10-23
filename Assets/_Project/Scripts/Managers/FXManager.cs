@@ -1,59 +1,67 @@
-using System.Collections;
-using System.Collections.Generic;
+using _Project.Scripts.Data;
+using _Project.Scripts.Game.Constants;
 using UnityEngine;
 using Zenject;
 
-public class FXManager : MonoBehaviour
+namespace _Project.Scripts.Managers
 {
-    private TimeScaleManager _timeScaleManager;
-
-    private ParticleLibrary _particleLibrary;
-
-    [Inject]
-    private void Initialize(TimeScaleManager timeScaleManager)
+    public class FXManager : IInitializable
     {
-        _timeScaleManager = timeScaleManager;
-    }
-
-    public void PlayLevelCompleteFX()
-    {
-        PlayCelebrationParticleSystem(Vector3.zero);
-    }
-
-    private void PlayCelebrationParticleSystem(Vector3 position)
-    {
-        _particleLibrary.celebrationPS.Play();
-    }
-}
-
-public class ParticleSystemPool
-{
-    private readonly int _poolSize;
-    private readonly ParticleSystem[] _particleSystems;
-
-    private int _index;
-
-    public ParticleSystemPool(int poolSize, ParticleSystem particleSystemPrefab, Transform parent)
-    {
-        _index = 0;
-        _poolSize = poolSize;
-        _particleSystems = new ParticleSystem[poolSize];
-
-        for (int i = 0; i < _poolSize; i++)
+        [Inject] private ParticleLibrary _particleLibrary;
+        private ParticleSystemPool _islandCompletePSPool;
+        private GameObject _psPoolParent;
+    
+        public void Initialize()
         {
-            _particleSystems[i] = Object.Instantiate(particleSystemPrefab, parent);
-            _particleSystems[i].Stop();
+            _psPoolParent = new GameObject(Constants.LevelGameObjectName);
+           // _islandCompletePSPool = new ParticleSystemPool(12, _particleLibrary.islandCompletedPS, _psPoolParent.transform);
+        }
+    
+        public void PlayLevelCompleteFX()
+        {
+            PlayCelebrationParticleSystem(Vector3.zero);
+        }
+
+        public void PlayIslandCompleteFX(Vector3 islandPosition)
+        {
+            _islandCompletePSPool.Play(islandPosition);
+        }
+        
+        private void PlayCelebrationParticleSystem(Vector3 position)
+        {
+            _particleLibrary.levelCompletedPS.Play();
         }
     }
 
-    public ParticleSystem Play(Vector3 position)
+    public class ParticleSystemPool
     {
-        var ps = _particleSystems[_index];
-        ps.transform.position = position;
-        ps.Play();
+        private readonly int _poolSize;
+        private readonly ParticleSystem[] _particleSystems;
 
-        _index = (_index + 1) % _poolSize;
+        private int _index;
 
-        return ps;
+        public ParticleSystemPool(int poolSize, ParticleSystem particleSystemPrefab, Transform parent)
+        {
+            _index = 0;
+            _poolSize = poolSize;
+            _particleSystems = new ParticleSystem[poolSize];
+
+            for (int i = 0; i < _poolSize; i++)
+            {
+                _particleSystems[i] = Object.Instantiate(particleSystemPrefab, parent);
+                _particleSystems[i].Stop();
+            }
+        }
+
+        public ParticleSystem Play(Vector3 position)
+        {
+            var ps = _particleSystems[_index];
+            ps.transform.position = position;
+            ps.Play();
+
+            _index = (_index + 1) % _poolSize;
+
+            return ps;
+        }
     }
 }

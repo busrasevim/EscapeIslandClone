@@ -1,34 +1,37 @@
 using UnityEngine;
 
-public class EndUI : UIPanel
+namespace _Project.Scripts.UI
 {
-    [SerializeField] private LevelCompletedUI levelCompletedUI;
-    [SerializeField] private LevelFailedUI levelFailedUI;
-    private bool _isWin;
+    public class EndUI : UIPanel
+    {
+        [SerializeField] private LevelCompletedUI levelCompletedUI;
+        [SerializeField] private LevelFailedUI levelFailedUI;
+        private bool _isWin;
     
-    public override void Show(float buttonDelay = 0)
-    {
-        if (_isWin)
+        public override void Show(float buttonDelay = 0)
         {
-            levelCompletedUI.Show();
-        }
-        else
-        {
-            levelFailedUI.Show();
-        }
+            if (_isWin)
+            {
+                levelCompletedUI.Show();
+            }
+            else
+            {
+                levelFailedUI.Show();
+            }
         
-        gameObject.SetActive(true);
-    }
+            gameObject.SetActive(true);
+        }
 
-    public override void Hide()
-    {
-        levelCompletedUI.Hide();
-        levelFailedUI.Hide();
-        gameObject.SetActive(false);
-    }
+        public override void Hide()
+        {
+            levelCompletedUI.Hide();
+            levelFailedUI.Hide();
+            gameObject.SetActive(false);
+        }
 
-    public void SetWin(bool isWin)
-    {
-        _isWin = isWin;
+        public void SetWin(bool isWin)
+        {
+            _isWin = isWin;
+        }
     }
 }

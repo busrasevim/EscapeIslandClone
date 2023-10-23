@@ -1,227 +1,194 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
+using _Project.Scripts.Game.Interfaces;
 using DG.Tweening;
 using Lean.Common;
 using Lean.Touch;
 using UnityEngine;
 
-public class Island : LeanSelectableBehaviour
+namespace _Project.Scripts.Game
 {
-    [SerializeField] private Transform leftBorder;
-    [SerializeField] private Transform rightBorder;
-    [SerializeField] private Transform behindBorder;
-    [SerializeField] private Transform frontBorder;
-    [SerializeField] private LeanSelectableByFinger leanSelectable;
-    
-    private MatchController _matchController;
-    private StickManager _stickManager;
-    
-    private float _islandStartYPosition;
-    private Tween _selectedTween;
-    private List<SlotGroup> _slotGroups;
-    private Stack<SlotGroup> _emptySlotGroups;
-    private Stack<SlotGroup> _filledSlotGroups;
-
-    public void Initialize(GameSettings settings, MatchController controller, StickManager stickManager)
+    public class Island : LeanSelectableBehaviour
     {
-        _slotGroups = new List<SlotGroup>();
+        [SerializeField] internal Transform leftBorder;
+        [SerializeField] internal Transform rightBorder;
+        [SerializeField] internal Transform behindBorder;
+        [SerializeField] internal Transform frontBorder;
+        [SerializeField] private LeanSelectableByFinger leanSelectable;
+        
+        private float _islandStartYPosition;
+        private Tween _selectedTween;
+        private List<SlotGroup> _slotGroups;
+        private Stack<SlotGroup> _emptySlotGroups;
+        private Stack<SlotGroup> _filledSlotGroups;
+        private int _slotStickCount;
+        
+        private StickManager _stickManager;
+        private IMatchController _matchController;
 
-        var stickCount = settings.slotStickCount;
-        for (int i = 0; i < stickCount; i++)
+        public void Initialize(int slotStickCount, StickManager stickManager, IMatchController matchController)
         {
-            var slot = new SlotGroup(stickCount, i, this);
-            _slotGroups.Add(slot);
-        }
+            _slotGroups = new List<SlotGroup>();
+            _emptySlotGroups = new Stack<SlotGroup>();
+            _filledSlotGroups = new Stack<SlotGroup>();
 
-        _emptySlotGroups = new Stack<SlotGroup>();
+            _slotStickCount = slotStickCount;
 
-        for (int i = stickCount - 1; i >= 0; i--)
-        {
-            _emptySlotGroups.Push(_slotGroups[i]);
-        }
-
-        _filledSlotGroups = new Stack<SlotGroup>();
-
-        _matchController = controller;
-        _islandStartYPosition = transform.position.y;
-        _stickManager = stickManager;
-    }
-
-    public bool TryGetEmptySlotGroup(out SlotGroup group)
-    {
-        if (_emptySlotGroups.Count == 0)
-        {
-            group = default;
-            return false;
-        }
-
-        group = _emptySlotGroups.Pop();
-        _filledSlotGroups.Push(group);
-
-        return true;
-    }
-
-    public void SetSlotEmpty(SlotGroup group)
-    {
-        _emptySlotGroups.Push(group);
-        _filledSlotGroups.Pop();
-    }
-
-    public List<StickManager.StickGroup> GetAvailableGroups(int emptySlotCountOfOtherIsland)
-    {
-        var color = GetFirstColor();
-        var groupList = new List<StickManager.StickGroup>();
-        for (int i = 0; i < emptySlotCountOfOtherIsland; i++)
-        {
-            if (_filledSlotGroups.Count == 0) break;
-            var slot = _filledSlotGroups.Peek();
-            if (slot.slotColor == color)
+            for (int i = 0; i < _slotStickCount; i++)
             {
-                groupList.Add(slot.currentGroup);
-                SetSlotEmpty(slot);
+                var slot = new SlotGroup(_slotStickCount, i, this);
+                _slotGroups.Add(slot);
             }
-            else
+            
+            for (int i = _slotStickCount - 1; i >= 0; i--)
             {
-                break;
+                _emptySlotGroups.Push(_slotGroups[i]);
             }
+            
+            _islandStartYPosition = transform.position.y;
+            _stickManager = stickManager;
+            _matchController = matchController;
         }
 
-        return groupList;
-    }
-
-    public void GroupTransition(List<StickManager.StickGroup> groups, Line line, Action done)
-    {
-        var controlNumber = 0;
-        for (int i = 0; i < groups.Count; i++)
+        public bool TryGetEmptySlotGroup(out SlotGroup group)
         {
-            var slot = _emptySlotGroups.Pop();
-            _filledSlotGroups.Push(slot);
-            groups[i].ChangeGroupPosition(slot, line, i, () =>
+            if (_emptySlotGroups.Count == 0)
             {
-                controlNumber++;
-                if (controlNumber == groups.Count)
-                    done.Invoke();
-            });
-        }
-
-        if (IsIslandComplete())
-        {
-            leanSelectable.enabled = false;
-            _stickManager.CompleteColor(GetFirstColor());
-        }
-    }
-
-    public int GetEmptySlotCount()
-    {
-        return _emptySlotGroups.Count;
-    }
-
-    private bool IsThereEmptySlot()
-    {
-        return _emptySlotGroups.Count > 0;
-    }
-
-    public bool IsIslandEmpty()
-    {
-        return _filledSlotGroups.Count == 0;
-    }
-
-    public bool IsIslandOkay(Island selectedIsland)
-    {
-        if (IsIslandEmpty())
-            return true;
-
-        return selectedIsland.GetFirstColor() == GetFirstColor() && IsThereEmptySlot();
-    }
-
-    private Color GetFirstColor()
-    {
-        return _filledSlotGroups.Peek().slotColor;
-    }
-
-    public void Activate()
-    {
-        leanSelectable.enabled = true;
-        gameObject.SetActive(true);
-    }
-
-    public void Deactivate()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void Deselect()
-    {
-        leanSelectable.Deselect();
-    }
-
-    public void Reset()
-    {
-        foreach (var slot in _filledSlotGroups)
-        {
-            _emptySlotGroups.Push(slot);
-        }
-
-        _filledSlotGroups.Clear();
-
-        Deactivate();
-    }
-
-    protected override void OnSelected(LeanSelect select)
-    {
-        _selectedTween?.Kill();
-        _selectedTween = transform.DOMoveY(_islandStartYPosition + 0.2f, 0.1f);
-        _matchController.SelectIsland(this);
-    }
-
-    protected override void OnDeselected(LeanSelect select)
-    {
-        _selectedTween?.Kill();
-        _selectedTween = transform.DOMoveY(_islandStartYPosition, 0.1f);
-    }
-
-    private bool IsIslandComplete()
-    {
-        if (_emptySlotGroups.Count > 0) return false;
-
-        var color = GetFirstColor();
-        foreach (var slot in _slotGroups)
-        {
-            if (slot.slotColor != color)
-            {
+                group = null;
                 return false;
             }
+
+            group = _emptySlotGroups.Pop();
+            _filledSlotGroups.Push(group);
+
+            return true;
+        }
+        
+        public List<StickGroup> GetAvailableStickGroups(int emptySlotCountOfOtherIsland)
+        {
+            var color = GetFirstGroupColor();
+            var stickGroupList = new List<StickGroup>();
+            for (int i = 0; i < emptySlotCountOfOtherIsland; i++)
+            {
+                if (_filledSlotGroups.Count == 0) break;
+                
+                var slotGroup = _filledSlotGroups.Peek();
+                if (slotGroup.GetSlotGroupColor() == color)
+                {
+                    stickGroupList.Add(slotGroup.CurrentStickGroup);
+                    SetSlotGroupEmpty(slotGroup);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return stickGroupList;
         }
 
-        return true;
-    }
-    
-    
-    [Serializable]
-    public class SlotGroup
-    {
-        public List<Vector3> slotPositions;
-        public Island currentIsland;
-        public Color slotColor;
-        public StickManager.StickGroup currentGroup;
-
-        public SlotGroup(int slotStickCount, int slotNumber, Island island)
+        public void StickGroupTransition(List<StickGroup> stickGroups, Line roadLine)
         {
-            slotPositions = new List<Vector3>();
-            currentIsland = island;
-
-            var plusXValue = (currentIsland.rightBorder.localPosition.x - currentIsland.leftBorder.localPosition.x) /
-                             (slotStickCount - 1);
-            var plusZValue = (currentIsland.frontBorder.localPosition.z - currentIsland.behindBorder.localPosition.z) /
-                             (slotStickCount - 1);
-
-            var slotZPosition = currentIsland.behindBorder.localPosition.z + slotNumber * plusZValue;
-            for (int i = 0; i < slotStickCount; i++)
+            var allTransitionStickCount = stickGroups.Count * _slotStickCount;
+            for (int i = 0; i < stickGroups.Count; i++)
             {
-                var newPositionX = island.leftBorder.localPosition.x + i * plusXValue;
-                var newPosition = new Vector3(newPositionX, 0f, slotZPosition);
-                slotPositions.Add(newPosition);
+                var slotGroup = _emptySlotGroups.Pop();
+                _filledSlotGroups.Push(slotGroup);
+                stickGroups[i].ChangeGroupPosition(slotGroup, roadLine, i, allTransitionStickCount);
             }
+        }
+
+        public int GetEmptySlotGroupCount()
+        {
+            return _emptySlotGroups.Count;
+        }
+
+        private bool IsThereEmptySlotGroup()
+        {
+            return _emptySlotGroups.Count > 0;
+        }
+
+        public bool IsIslandEmpty()
+        {
+            return _filledSlotGroups.Count == 0;
+        }
+        
+        public Color GetFirstGroupColor()
+        {
+            return _filledSlotGroups.Peek().CurrentStickGroup.GetGroupColor();
+        }
+        
+        public bool IsIslandOkayForMatch(Color otherIslandColor)
+        {
+            if (IsIslandEmpty())
+                return true;
+
+            return otherIslandColor == GetFirstGroupColor() && IsThereEmptySlotGroup();
+        }
+
+        public void Activate()
+        {
+            leanSelectable.enabled = true;
+            gameObject.SetActive(true);
+        }
+
+        public void Deactivate()
+        {
+            gameObject.SetActive(false);
+        }
+
+        public void Deselect()
+        {
+            leanSelectable.Deselect();
+        }
+
+        public void Reset()
+        {
+            foreach (var slotGroup in _filledSlotGroups)
+            {
+                _emptySlotGroups.Push(slotGroup);
+            }
+
+            _filledSlotGroups.Clear();
+
+            Deactivate();
+        }
+
+        public void CompleteControl()
+        {
+            if (IsIslandComplete())
+            {
+                leanSelectable.enabled = false;
+                _stickManager.CompleteColor(GetFirstGroupColor());
+            }
+        }
+        
+        protected override void OnSelected(LeanSelect select)
+        {
+            _selectedTween?.Kill();
+            _selectedTween = transform.DOMoveY(_islandStartYPosition + 0.2f, 0.1f);
+            _matchController.SelectIsland(this);
+        }
+
+        protected override void OnDeselected(LeanSelect select)
+        {
+            _selectedTween?.Kill();
+            _selectedTween = transform.DOMoveY(_islandStartYPosition, 0.1f);
+        }
+
+        private void SetSlotGroupEmpty(SlotGroup slotGroup)
+        {
+            _emptySlotGroups.Push(slotGroup);
+            _filledSlotGroups.Pop();
+        }
+        
+        
+        private bool IsIslandComplete()
+        {
+            if (_emptySlotGroups.Count > 0) return false;
+
+            var color = GetFirstGroupColor();
+            return _slotGroups.All(slot => slot.GetSlotGroupColor() == color);
         }
     }
 }

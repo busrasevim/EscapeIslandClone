@@ -1,54 +1,55 @@
-using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ProgressUI : UIPanel
+namespace _Project.Scripts.UI
 {
-    [SerializeField] private TMP_Text levelText;
-    [SerializeField] private TMP_Text currentLevelText;
-    [SerializeField] private TMP_Text nextLevelText;
-    [SerializeField] private Image progressBarFillImage;
-
-    public void UpdateProgress(float progressFillAmount, bool animated = false, float duration = 1f)
+    public class ProgressUI : UIPanel
     {
-        progressBarFillImage.DOKill();
+        [SerializeField] private TMP_Text levelText;
+        [SerializeField] private TMP_Text currentLevelText;
+        [SerializeField] private TMP_Text nextLevelText;
+        [SerializeField] private Image progressBarFillImage;
 
-        if (animated)
+        private void UpdateProgress(float progressFillAmount, bool animated = false, float duration = 1f)
         {
-            progressBarFillImage.fillAmount = progressFillAmount;
-            progressBarFillImage.DOFillAmount(progressFillAmount, duration).SetEase(Ease.OutElastic);
+            progressBarFillImage.DOKill();
+
+            if (animated)
+            {
+                progressBarFillImage.fillAmount = progressFillAmount;
+                progressBarFillImage.DOFillAmount(progressFillAmount, duration).SetEase(Ease.OutElastic);
+            }
+            else
+            {
+                progressBarFillImage.fillAmount = progressFillAmount;
+            }
         }
-        else
+
+        public void ResetProgress()
         {
-            progressBarFillImage.fillAmount = progressFillAmount;
+            UpdateProgress(0f);
         }
-    }
 
-    public void ResetProgress()
-    {
-        UpdateProgress(0f);
-    }
+        public void UpdateLevelTexts(int currentLeveNo)
+        {
+            levelText.DOFade(1f, 0.25f);
+            levelText.text = "Level " + currentLeveNo;
 
-    public void UpdateLevelTexts(int currentLeveNo)
-    {
-        levelText.DOFade(1f, 0.25f);
-        levelText.text = "Level " + currentLeveNo;
+            var nextLevelNo = currentLeveNo + 1;
+            currentLevelText.text = currentLeveNo.ToString();
+            nextLevelText.text = nextLevelNo.ToString();
+        }
 
-        var nextLevelNo = currentLeveNo + 1;
-        currentLevelText.text = currentLeveNo.ToString();
-        nextLevelText.text = nextLevelNo.ToString();
-    }
-
-    public override void Show(float buttonDelay = 0)
-    {
+        public override void Show(float buttonDelay = 0)
+        {
         
-    }
+        }
 
-    public override void Hide()
-    {
+        public override void Hide()
+        {
         
+        }
     }
 }

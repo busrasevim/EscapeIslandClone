@@ -1,140 +1,174 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
+using _Project.Scripts.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-public class Stick : MonoBehaviour
+namespace _Project.Scripts.Game
 {
-    private Island.SlotGroup _currentSlotGroup;
-    [SerializeField] private Animator animator;
-    private List<Vector3> _roadPositions;
-    private Vector3 _targetPosition;
-    private bool _onRoad;
-    private Vector3 _localIslandPosition;
-    private Line _currentMainLine;
-    private Coroutine _movementCoroutine;
-    
-    private static readonly int Run = Animator.StringToHash("Run");
-    public void PrepareStick(Color color)
+    public class Stick : MonoBehaviour
     {
-        GetComponentInChildren<Renderer>().material.color = color;
-        _roadPositions = new List<Vector3>();
-    }
+        [SerializeField] private Animator animator;
+        [SerializeField] private Renderer selfRenderer;
 
-    public void GoNewPlace(Line line, Vector3 position, Island.SlotGroup group, int index, Action done)
-    {
-        _currentSlotGroup = group;
-        var linePositions = line.GetPositions();
-        var positions = new Vector3[linePositions.Length - 2];
-        for (int i = 0; i < positions.Length; i++)
+        private SlotGroup _currentSlotGroup;
+        private List<Vector3> _roadPositions;
+        private Vector3 _targetPosition;
+        private bool _onRoad;
+        private Vector3 _localIslandPosition;
+        private Line _currentMainLine;
+
+        private GameSettings _settings;
+
+        private CancellationToken _cancellationToken;
+        private CancellationTokenSource _moveIslandCancellationSource;
+
+        private static readonly int Run = Animator.StringToHash(Constants.Constants.StickRunAnimationKey);
+
+        public void PrepareStick(Color color, GameSettings settings)
         {
-            positions[i] = linePositions[i + 1];
+            selfRenderer.material.color = color;
+            _settings = settings;
+            _roadPositions = new List<Vector3>();
         }
 
-        _localIslandPosition = position;
-        if (_onRoad)
+        public void GoNewPlace(Line line, Vector3 finalLocalPosition, SlotGroup slotGroup, int stickIndex,
+            int allStickCount)
         {
-            _roadPositions.Clear();
-            _roadPositions.Add(_targetPosition);
-            _currentMainLine.AddSiblingLine(line);
-        }
-        else
-        {
-            _currentMainLine = line;
-        }
+            _currentSlotGroup = slotGroup;
+            _localIslandPosition = finalLocalPosition;
 
-        _roadPositions.AddRange(positions);
-
-        if (_onRoad)
-        {
-            transform.SetParent(_currentSlotGroup.currentIsland.transform);
-            return;
-        }
-        _onRoad = true;
-        
-        _movementCoroutine = StartCoroutine(MoveToTargetIsland(index, () =>
-        {
-            transform.DOLocalMove(_localIslandPosition, 1f).OnComplete(() =>
+            var linePositions = line.GetPositions();
+            var positions = new Vector3[linePositions.Length - 2];
+            for (int i = 0; i < positions.Length; i++)
             {
-                done.Invoke();
-                StopRunAnimation();
-                transform.DORotate(_currentSlotGroup.currentIsland.transform.eulerAngles, 0.5f);
-                _onRoad = false;
-            });
+                positions[i] = linePositions[i + 1];
+            }
 
-            _movementCoroutine = null;
-        }));
-        
-    }
-    private void PlayRunAnimation()
-    {
-        animator.SetBool(Run, true);
-    }
-
-    private void StopRunAnimation()
-    {
-        animator.SetBool(Run, false);
-    }
-
-    public void Deactivate()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void Activate()
-    {
-        gameObject.SetActive(true);
-    }
-
-    private IEnumerator MoveToTargetIsland(int index, Action done)
-    {
-      //  var targetPosition = roadPositions[targetIndex];
-        _targetPosition = _roadPositions[0];
-
-        yield return new WaitForSeconds(index * 0.5f);
-        transform.SetParent(_currentSlotGroup.currentIsland.transform);
-        var direction = (_targetPosition - transform.position).normalized;
-        var targetRotation = Quaternion.LookRotation(direction);
-        PlayRunAnimation();
-        while (true)
-        {
-            if (Vector2.Distance(new Vector2(transform.position.x,transform.position.z), new Vector2(_targetPosition.x,_targetPosition.z)) > 0.025f)
+            if (_onRoad)
             {
-                transform.position += direction * Time.deltaTime * 1.5f;
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation,  9f*Time.deltaTime);
-
+                _roadPositions.Clear();
+                _roadPositions.Add(_targetPosition);
+                _currentMainLine.AddSiblingLine(line);
             }
             else
             {
-                _roadPositions.RemoveAt(0);
-                if (_roadPositions.Count==0)
-                {
-                    break;
-                }
-
-                _targetPosition = _roadPositions[0];
-                direction = (_targetPosition - transform.position).normalized;
-                targetRotation=Quaternion.LookRotation(direction);
+                _currentMainLine = line;
             }
 
-            yield return null;
-            //await UniTask.Yield(PlayerLoopTiming.Update);
+            _roadPositions.AddRange(positions);
+
+            if (_onRoad)
+            {
+                transform.SetParent(_currentSlotGroup.CurrentIsland.transform);
+                return;
+            }
+
+            MoveToTargetIsland(_cancellationToken, stickIndex, () => { StickLastMovement(allStickCount, stickIndex); });
         }
-
-        done.Invoke();
-    }
-
-    public void Reset()
-    {
-        if (_movementCoroutine != null)
+        
+        public void Activate()
         {
-            StopCoroutine(_movementCoroutine);
+            gameObject.SetActive(true);
         }
-        Deactivate();
-        _roadPositions.Clear();
-        _onRoad = false;
+        
+        public void Deactivate()
+        {
+            gameObject.SetActive(false);
+        }
+        
+        public void Reset()
+        {
+            Deactivate();
+            _roadPositions.Clear();
+            _onRoad = false;
+            CancelMovementToken();
+        }
+        
+        private void StickLastMovement(int allOnRoadStickCount, int stickIndex)
+        {
+            transform.DOLocalMove(_localIslandPosition, _settings.lastMoveTime).OnComplete(() =>
+            {
+                StopRunAnimation();
+                transform.DORotate(_currentSlotGroup.CurrentIsland.transform.eulerAngles, _settings.lastRotateTime);
+                _onRoad = false;
+                TransitionCompleteControl(allOnRoadStickCount, stickIndex);
+            });
+        }
+
+        private void PlayRunAnimation()
+        {
+            animator.SetBool(Run, true);
+        }
+
+        private void StopRunAnimation()
+        {
+            animator.SetBool(Run, false);
+        }
+
+        private async void MoveToTargetIsland(CancellationToken cancellationToken, int index, Action done)
+        {
+            _moveIslandCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _targetPosition = _roadPositions[0];
+
+            await UniTask.Delay(TimeSpan.FromSeconds(index * _settings.groupMoveDelayTime),
+                    cancellationToken: _moveIslandCancellationSource.Token)
+                .SuppressCancellationThrow();
+            transform.SetParent(_currentSlotGroup.CurrentIsland.transform);
+            var direction = (_targetPosition - transform.position).normalized;
+            var targetRotation = Quaternion.LookRotation(direction);
+            PlayRunAnimation();
+            _onRoad = true;
+            while (!_moveIslandCancellationSource.IsCancellationRequested)
+            {
+                if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z),
+                        new Vector2(_targetPosition.x, _targetPosition.z)) > 0.025f)
+                {
+                    transform.position += direction * (Time.deltaTime * _settings.stickMoveSpeed);
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation,
+                        _settings.stickRotateSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    _roadPositions.RemoveAt(0);
+                    if (_roadPositions.Count == 0)
+                    {
+                        break;
+                    }
+
+                    _targetPosition = _roadPositions[0];
+                    direction = (_targetPosition - transform.position).normalized;
+                    targetRotation = Quaternion.LookRotation(direction);
+                }
+
+                await UniTask.Yield(cancellationToken: _moveIslandCancellationSource.Token).SuppressCancellationThrow();
+            }
+
+            done.Invoke();
+        }
+
+       
+
+        private void OnDestroy()
+        {
+            CancelMovementToken();
+        }
+
+        private void CancelMovementToken()
+        {
+            if (_moveIslandCancellationSource is { Token: { IsCancellationRequested: false } })
+            {
+                _moveIslandCancellationSource.Cancel();
+            }
+        }
+
+        private void TransitionCompleteControl(int onRoadStickCount, int currentIndex)
+        {
+            if (currentIndex != onRoadStickCount - 1) return;
+            _currentMainLine.Deactivate();
+            _currentSlotGroup.CurrentIsland.CompleteControl();
+        }
     }
 }

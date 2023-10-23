@@ -884,7 +884,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89715ad69b973a14899afa2c6730b30b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _scriptableObjectInstallers: []
+  _scriptableObjectInstallers:
+  - {fileID: 11400000, guid: 1520f3a3e466b5f439af011b0c7c548e, type: 2}
   _monoInstallers:
   - {fileID: 1285849378}
   _installerPrefabs: []
@@ -931,9 +932,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a8ad331337e80e479658000e58b0146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputHandlerObject: {fileID: 3121844967082061680, guid: 71c5daf433557034f93201a0350e7410, type: 3}
   objectPoolObject: {fileID: 7238971267313503069, guid: 82cf16f62179f074c9e63b40aecd7d2c, type: 3}
-  dataHolderObject: {fileID: 476620482471139132, guid: c912df7d2c61b1748b7a8171fb4f0764, type: 3}
+  islandPrefab: {fileID: 7584499966191485062, guid: 531be338519548e47b287e002283ac22, type: 3}
+  stickPrefab: {fileID: 1819322328528329745, guid: 2fa9f4fad875cfa49922af9813e6edf5, type: 3}
+  linePrefab: {fileID: 7056023463794435197, guid: 001d537a1c28c3b408a22b16c74cc108, type: 3}
 --- !u!1 &1875243670
 GameObject:
   m_ObjectHideFlags: 0

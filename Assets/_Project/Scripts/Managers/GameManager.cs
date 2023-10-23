@@ -1,109 +1,80 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using _Project.Scripts.Level;
+using _Project.Scripts.Level.Signals;
+using _Project.Scripts.Pools;
+using _Project.Scripts.State_Machine.State_Machines;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
-public class GameManager : IInitializable, IDisposable
+namespace _Project.Scripts.Managers
 {
-    [Inject] private ISaveSystem _saveSystem;
-    [Inject] private MainStateMachine _mainStateMachine;
-    [Inject] private UIStateMachine _uIStateMachine;
-    [Inject] private LevelManager _levelManager;
-    [Inject] private ObjectPool _objectPool;
+    public class GameManager : IInitializable
+    {
+        [Inject] private ISaveSystem _saveSystem;
+        [Inject] private MainStateMachine _mainStateMachine;
+        [Inject] private UIStateMachine _uIStateMachine;
+        [Inject] private LevelManager _levelManager;
+        [Inject] private ObjectPool _objectPool;
     
-    [Inject] private SignalBus _signalBus;
-    private FXManager _fxManager;
+        [Inject] private SignalBus _signalBus;
+        private FXManager _fxManager;
 
-    public void Initialize()
-    {
-        SetUpLevel();
-    }
-
-    public void Dispose()
-    {
-        //like onDestroy, after all destroy methods
-    }
-
-    private void SetUpLevel()
-    {
-        _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Start);
-
-        _levelManager.SetUpLevel();
-
-        _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.Start);
-    }
-    
-    private async void RestartLevelAfter(float delay)
-    {
-        await UniTask.Delay(TimeSpan.FromSeconds(delay));
-        RestartLevel();
-    }
-    
-    public void RestartLevel()
-    {
-        //will be filled...
-
-        SetUpLevel();
-    }
-
-    #region Game State Events
-
-    public void StartLevel()
-    {
-        
-        _signalBus.TryFire(new OnLevelStartSignal(_levelManager.CurrentLevelNo));
-    }
-
-    public void EndLevel(bool isWin)
-    {
-        _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Finish);
-
-        if (isWin)
+        public void Initialize()
         {
-            LevelCompleted();
-            _signalBus.TryFire(new OnLevelEndSignal(true));
-            return;
+            SetUpLevel();
         }
 
-        LevelFailed();
-        _signalBus.TryFire(new OnLevelEndSignal(false));
-    }
+        private void SetUpLevel()
+        {
+            _mainStateMachine.SetStateWithKey(MainStateMachine.MainState.Start);
+            _uIStateMachine.SetStateWithKey(UIStateMachine.UIState.Start);
 
-    private void LevelCompleted()
-    {
-        _levelManager.NextLevel();
+            _levelManager.SetUpLevel();
+        }
+    
+        private async void RestartLevelAfter(float delay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(delay));
+            RestartLevel();
+        }
+    
+        public void RestartLevel()
+        {
+            SetUpLevel();
+        }
 
-      //  _fxManager.PlayLevelCompleteFX();
+        #region Game State Events
 
-        Debug.Log("Level completed.");
-    }
+        public void StartLevel()
+        {
+            _signalBus.TryFire(new OnLevelStartSignal(_levelManager.CurrentLevelNo));
+        }
 
-    private void LevelFailed()
-    {
-        Debug.Log("Level failed.");
-    }
+        public void EndLevel(bool isWin)
+        {
+            if(isWin)
+                LevelCompleted();
+            else
+                LevelFailed();
+       
+            _signalBus.TryFire(new OnLevelEndSignal(isWin));
+        }
 
-    #endregion
-}
+        private void LevelCompleted()
+        {
+            _levelManager.NextLevel();
 
-public struct OnLevelEndSignal
-{
-    public readonly bool IsWin;
+            //  _fxManager.PlayLevelCompleteFX();
 
-    public OnLevelEndSignal(bool isWin)
-    {
-        IsWin = isWin;
-    }
-}
+            Debug.Log("Level completed.");
+        }
 
-public struct OnLevelStartSignal
-{
-    public readonly int StartingLevelIndex;
+        private void LevelFailed()
+        {
+            Debug.Log("Level failed.");
+        }
 
-    public OnLevelStartSignal(int startingLevelIndex)
-    {
-        StartingLevelIndex = startingLevelIndex;
+        #endregion
     }
 }
