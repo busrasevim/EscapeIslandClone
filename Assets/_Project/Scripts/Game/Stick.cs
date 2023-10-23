@@ -37,8 +37,11 @@ namespace _Project.Scripts.Game
         public void GoNewPlace(Line line, Vector3 finalLocalPosition, SlotGroup slotGroup, int stickIndex,
             int allStickCount)
         {
+            if (_onRoad) _currentSlotGroup.CurrentIsland.RemoveStickTo(this);
+
             _currentSlotGroup = slotGroup;
             _localIslandPosition = finalLocalPosition;
+            _currentSlotGroup.CurrentIsland.AddStickTo(this);
 
             var linePositions = line.GetPositions();
             var positions = new Vector3[linePositions.Length - 2];
@@ -56,6 +59,7 @@ namespace _Project.Scripts.Game
             else
             {
                 _currentMainLine = line;
+                _currentMainLine.AddStick(this);
             }
 
             _roadPositions.AddRange(positions);
@@ -68,17 +72,17 @@ namespace _Project.Scripts.Game
 
             MoveToTargetIsland(_cancellationToken, stickIndex, () => { StickLastMovement(allStickCount, stickIndex); });
         }
-        
+
         public void Activate()
         {
             gameObject.SetActive(true);
         }
-        
+
         public void Deactivate()
         {
             gameObject.SetActive(false);
         }
-        
+
         public void Reset()
         {
             Deactivate();
@@ -86,7 +90,7 @@ namespace _Project.Scripts.Game
             _onRoad = false;
             CancelMovementToken();
         }
-        
+
         private void StickLastMovement(int allOnRoadStickCount, int stickIndex)
         {
             transform.DOLocalMove(_localIslandPosition, _settings.lastMoveTime).OnComplete(() =>
@@ -149,7 +153,6 @@ namespace _Project.Scripts.Game
             done.Invoke();
         }
 
-       
 
         private void OnDestroy()
         {
@@ -166,9 +169,8 @@ namespace _Project.Scripts.Game
 
         private void TransitionCompleteControl(int onRoadStickCount, int currentIndex)
         {
-            if (currentIndex != onRoadStickCount - 1) return;
-            _currentMainLine.Deactivate();
-            _currentSlotGroup.CurrentIsland.CompleteControl();
+            _currentMainLine.RemoveStick(this);
+            _currentSlotGroup.CurrentIsland.RemoveStickTo(this);
         }
     }
 }

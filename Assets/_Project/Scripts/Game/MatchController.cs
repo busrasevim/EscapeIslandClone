@@ -1,4 +1,5 @@
 using _Project.Scripts.Game.Interfaces;
+using Lean.Common;
 using Zenject;
 
 namespace _Project.Scripts.Game
@@ -6,8 +7,12 @@ namespace _Project.Scripts.Game
     public class MatchController : IMatchController
     {
         private Island _selectedIsland;
+        private Island _secondSelectedIsland;
         private Island[] _allIslands;
         [Inject] private LineManager _lineManager;
+        private LeanSelect _leanSelect;
+        
+        
 
         public void SelectIsland(Island island)
         {
@@ -17,6 +22,7 @@ namespace _Project.Scripts.Game
                 return;
             }
 
+            _secondSelectedIsland = island;
             var isSelectedIslandValid = _selectedIsland && !_selectedIsland.IsIslandEmpty();
             if (isSelectedIslandValid)
             {
@@ -46,6 +52,7 @@ namespace _Project.Scripts.Game
         public void DeselectAll()
         {
             _selectedIsland = null;
+            _secondSelectedIsland = null;
             foreach (var island in _allIslands)
             {
                 island.Deselect();

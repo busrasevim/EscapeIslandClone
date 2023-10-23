@@ -65,8 +65,6 @@ namespace _Project.Scripts.Managers
         {
             _levelManager.NextLevel();
 
-            //  _fxManager.PlayLevelCompleteFX();
-
             Debug.Log("Level completed.");
         }
 

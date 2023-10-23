@@ -1,5 +1,6 @@
 using _Project.Scripts.Data;
 using _Project.Scripts.Game.Constants;
+using _Project.Scripts.Level.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -8,28 +9,45 @@ namespace _Project.Scripts.Managers
     public class FXManager : IInitializable
     {
         [Inject] private ParticleLibrary _particleLibrary;
+        [Inject] private SignalBus _signalBus;
         private ParticleSystemPool _islandCompletePSPool;
+        private ParticleSystem _levelCompletedPS;
         private GameObject _psPoolParent;
+        
+        
     
         public void Initialize()
         {
+            _signalBus.Subscribe<OnLevelEndSignal>(OnLevelEnd);
+            _levelCompletedPS = Object.Instantiate(_particleLibrary.levelCompletedPS);
+            _levelCompletedPS.transform.SetParent(Camera.main.transform);
+            _levelCompletedPS.transform.localPosition = new Vector3(0f, -4.71f, 1.7f);
+            _levelCompletedPS.transform.localEulerAngles = new Vector3(270f, 0, 0);
+            
             _psPoolParent = new GameObject(Constants.LevelGameObjectName);
-           // _islandCompletePSPool = new ParticleSystemPool(12, _particleLibrary.islandCompletedPS, _psPoolParent.transform);
+            _islandCompletePSPool = new ParticleSystemPool(12, _particleLibrary.islandCompletedPS, _psPoolParent.transform);
         }
     
-        public void PlayLevelCompleteFX()
+        private void PlayLevelCompleteFX()
         {
-            PlayCelebrationParticleSystem(Vector3.zero);
+            PlayCelebrationParticleSystem();
         }
 
-        public void PlayIslandCompleteFX(Vector3 islandPosition)
+        public void PlayIslandCompleteFX(Transform islandTransform)
         {
-            _islandCompletePSPool.Play(islandPosition);
+            var ps = _islandCompletePSPool.Play(islandTransform.position);
+            ps.transform.rotation = islandTransform.rotation;
         }
         
-        private void PlayCelebrationParticleSystem(Vector3 position)
+        private void PlayCelebrationParticleSystem()
         {
-            _particleLibrary.levelCompletedPS.Play();
+            _levelCompletedPS.Play();
+        }
+
+        private void OnLevelEnd(OnLevelEndSignal args)
+        {
+            if(args.IsWin)
+                PlayLevelCompleteFX();
         }
     }
 

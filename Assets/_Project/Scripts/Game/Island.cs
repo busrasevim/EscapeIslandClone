@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using _Project.Scripts.Game.Interfaces;
+using _Project.Scripts.Managers;
 using DG.Tweening;
 using Lean.Common;
 using Lean.Touch;
@@ -22,6 +23,7 @@ namespace _Project.Scripts.Game
         private Stack<SlotGroup> _emptySlotGroups;
         private Stack<SlotGroup> _filledSlotGroups;
         private int _slotStickCount;
+        private List<Stick> _onRoadSticks;
         
         private StickManager _stickManager;
         private IMatchController _matchController;
@@ -31,6 +33,7 @@ namespace _Project.Scripts.Game
             _slotGroups = new List<SlotGroup>();
             _emptySlotGroups = new Stack<SlotGroup>();
             _filledSlotGroups = new Stack<SlotGroup>();
+            _onRoadSticks = new List<Stick>();
 
             _slotStickCount = slotStickCount;
 
@@ -151,6 +154,7 @@ namespace _Project.Scripts.Game
 
             _filledSlotGroups.Clear();
 
+            _onRoadSticks.Clear();
             Deactivate();
         }
 
@@ -159,7 +163,21 @@ namespace _Project.Scripts.Game
             if (IsIslandComplete())
             {
                 leanSelectable.enabled = false;
-                _stickManager.CompleteColor(GetFirstGroupColor());
+                _stickManager.CompleteColor(GetFirstGroupColor(),transform);
+            }
+        }
+
+        public void AddStickTo(Stick stick)
+        {
+            _onRoadSticks.Add(stick);
+        }
+
+        public void RemoveStickTo(Stick stick)
+        {
+            _onRoadSticks.Remove(stick);
+            if (_onRoadSticks.Count == 0)
+            {
+                CompleteControl();
             }
         }
         

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bca41143ca11df94d9ea445e9ee0d40d, type: 3}
   m_Name: Particle Library
   m_EditorClassIdentifier: 
-  levelCompletedPS: {fileID: 0}
-  islandCompletedPS: {fileID: 0}
+  levelCompletedPS: {fileID: 198841646050254840, guid: 37801702d69a749cfa01231e5b9fc0f1, type: 3}
+  islandCompletedPS: {fileID: 2457650237427942020, guid: 166f534fab81dad4c866233ef8a52074, type: 3}

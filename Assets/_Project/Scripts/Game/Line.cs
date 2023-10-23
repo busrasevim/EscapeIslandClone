@@ -9,11 +9,13 @@ namespace _Project.Scripts.Game
         [SerializeField] private LineRenderer lineRenderer;
         private LineManager _lineManager;
         private List<Line> _siblingLines;
+        private List<Stick> _onSticks;
 
         public void Initialize(LineManager lineManager)
         {
             _lineManager = lineManager;
             _siblingLines = new List<Line>();
+            _onSticks = new List<Stick>();
             Deactivate();
         }
 
@@ -34,6 +36,7 @@ namespace _Project.Scripts.Game
             }
 
             _siblingLines.Clear();
+            _onSticks.Clear();
         }
 
         public Vector3[] GetPositions()
@@ -43,6 +46,19 @@ namespace _Project.Scripts.Game
             return linePoints;
         }
 
+        public void AddStick(Stick stick)
+        {
+            _onSticks.Add(stick);
+        }
+
+        public void RemoveStick(Stick stick)
+        {
+            _onSticks.Remove(stick);
+            if (_onSticks.Count == 0)
+            {
+                Deactivate();
+            }
+        }
         public void AddSiblingLine(Line line)
         {
             _siblingLines.Add(line);

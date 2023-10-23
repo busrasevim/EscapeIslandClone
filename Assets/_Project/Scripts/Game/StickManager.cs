@@ -14,6 +14,8 @@ namespace _Project.Scripts.Game
         [Inject] private ObjectPool _objectPool;
         [Inject] private GameSettings _settings;
         [Inject] private GameManager _gameManager;
+        [Inject] private FXManager _fxManager;
+        
         private List<StickGroup> _levelSticks;
         private Dictionary<Color, List<StickGroup>> _allSticks;
         private Dictionary<Color, bool> _colorCompletion;
@@ -28,8 +30,9 @@ namespace _Project.Scripts.Game
             GenerateLevelSticks(colorCount);
         }
 
-        public void CompleteColor(Color color)
+        public void CompleteColor(Color color, Transform islandTransform)
         {
+            _fxManager.PlayIslandCompleteFX(islandTransform);
             _colorCompletion[color] = true;
             var isComplete = _colorCompletion.All(kv => kv.Value);
             if (isComplete)
