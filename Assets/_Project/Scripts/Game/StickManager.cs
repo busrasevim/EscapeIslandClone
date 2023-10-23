@@ -55,20 +55,20 @@ namespace _Project.Scripts.Game
         
         private void GenerateAllSticks()
         {
-            var colors = _settings.stickColors;
+            var materials = _settings.stickMaterials;
             var stickCount = _settings.slotStickCount;
 
             _allSticks = new Dictionary<Color, List<StickGroup>>();
-            foreach (var color in colors)
+            foreach (var material in materials)
             {
                 var sticks = new List<StickGroup>();
                 for (int j = 0; j < stickCount; j++)
                 {
-                    var group = GetStickGroup(color);
+                    var group = GetStickGroup(material);
                     sticks.Add(group);
                 }
 
-                _allSticks.Add(color, sticks);
+                _allSticks.Add(material.color, sticks);
             }
 
             foreach (var stickGroup in _allSticks.SelectMany(kvp => kvp.Value))
@@ -93,7 +93,12 @@ namespace _Project.Scripts.Game
         {
             var sticks = new List<StickGroup>();
 
-            var levelColors = _settings.stickColors.GetRandomElements(levelColorCount);
+            var materials = _settings.stickMaterials.GetRandomElements(levelColorCount);
+            var levelColors = new Color[materials.Length];
+            for (int i = 0; i < materials.Length; i++)
+            {
+                levelColors[i] = materials[i].color;
+            }
             foreach (var color in levelColors)
             {
                 sticks.AddRange(_allSticks[color]);
@@ -104,9 +109,9 @@ namespace _Project.Scripts.Game
             return sticks;
         }
 
-        private StickGroup GetStickGroup(Color color)
+        private StickGroup GetStickGroup(Material material)
         {
-            return new StickGroup(_objectPool, color, _settings);
+            return new StickGroup(_objectPool, material, _settings);
         }
     }
 }

@@ -27,9 +27,9 @@ namespace _Project.Scripts.Game
 
         private static readonly int Run = Animator.StringToHash(Constants.Constants.StickRunAnimationKey);
 
-        public void PrepareStick(Color color, GameSettings settings)
+        public void PrepareStick(Material material, GameSettings settings)
         {
-            selfRenderer.material.color = color;
+            selfRenderer.material = material;
             _settings = settings;
             _roadPositions = new List<Vector3>();
         }

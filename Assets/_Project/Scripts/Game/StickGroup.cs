@@ -11,16 +11,16 @@ namespace _Project.Scripts.Game
         private SlotGroup _currentSlotGroup;
         private readonly Color _stickGroupColor;
 
-        public StickGroup(ObjectPool pool, Color color, GameSettings settings)
+        public StickGroup(ObjectPool pool, Material material, GameSettings settings)
         {
             _stickGroup = new List<Stick>();
-            _stickGroupColor = color;
+            _stickGroupColor = material.color;
             var stickCount = settings.slotStickCount;
 
             for (int i = 0; i < stickCount; i++)
             {
                 var stick = pool.SpawnFromPool(PoolTags.Stick, Vector3.zero, Quaternion.identity).GetComponent<Stick>();
-                stick.PrepareStick(_stickGroupColor, settings);
+                stick.PrepareStick(material, settings);
                 _stickGroup.Add(stick);
             }
         }

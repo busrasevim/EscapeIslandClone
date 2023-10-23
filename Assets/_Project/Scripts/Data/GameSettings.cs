@@ -8,7 +8,7 @@ namespace _Project.Scripts.Data
         [Header("LEVEL GENERATION")]
         [Range(3, 5)] public int slotStickCount;
         public int bonusLevelIslandCount;
-        public Color[] stickColors;
+        public Material[] stickMaterials;
         public float oppositeIslandsDistance = 4f;
         public float nearIslandsDistance = 1.5f;
         public float zCenterPosition = 2.7f;

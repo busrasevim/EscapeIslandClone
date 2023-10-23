@@ -14,13 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotStickCount: 4
   bonusLevelIslandCount: 9
-  stickColors:
-  - {r: 0.8490566, g: 0.77691185, b: 0.1481844, a: 1}
-  - {r: 0.27761286, g: 0.8679245, b: 0.15966538, a: 1}
-  - {r: 0.8207547, g: 0.22841759, b: 0.22841759, a: 1}
-  - {r: 0.8207547, g: 0.14324492, b: 0.78360486, a: 1}
-  - {r: 0.5361157, g: 0.12629052, b: 0.8113208, a: 1}
-  - {r: 0.17621933, g: 0.7849675, b: 0.8301887, a: 1}
-  - {r: 0.07662869, g: 0.17886247, b: 0.7735849, a: 1}
-  - {r: 0.8490566, g: 0.43250424, b: 0.11614456, a: 1}
-  - {r: 0.07115523, g: 0.38679248, b: 0.0813701, a: 1}
+  stickMaterials:
+  - {fileID: 2100000, guid: c0653a2dab34d3b4abddf26602907ffd, type: 2}
+  - {fileID: 2100000, guid: 9c5fe77a877a321498888cd59cbb5c80, type: 2}
+  - {fileID: 2100000, guid: 8e37ce99de2edec40b7d8c8b278e9f61, type: 2}
+  - {fileID: 2100000, guid: 68e0a1a8b09dc9142b45850be2a7c17f, type: 2}
+  - {fileID: 2100000, guid: 2223620102884a04cb9eb8887508c053, type: 2}
+  - {fileID: 2100000, guid: 4e01079dec68fcc418b987e818ab19cd, type: 2}
+  - {fileID: 2100000, guid: e5fa1c460cfdad5469704fb087eb8b61, type: 2}
+  - {fileID: 2100000, guid: 30d2758c810d4ae468455c6c830f8193, type: 2}
+  - {fileID: 2100000, guid: a8589e80b5f30d54aa60182c0a097c5f, type: 2}
+  - {fileID: 2100000, guid: 34a479760b750db4387657daa3ba161c, type: 2}
+  oppositeIslandsDistance: 4
+  nearIslandsDistance: 1.5
+  zCenterPosition: 2.7
+  normalIslandOffset: 2
+  bonusLevelRadius: 2.4
+  stickMoveSpeed: 1.5
+  stickRotateSpeed: 9
+  lastMoveTime: 1
+  lastRotateTime: 0.5
+  groupMoveDelayTime: 0.5
