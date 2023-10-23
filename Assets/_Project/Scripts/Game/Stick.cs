@@ -1,8 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using _Project.Scripts.Data;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -19,11 +18,12 @@ namespace _Project.Scripts.Game
         private bool _onRoad;
         private Vector3 _localIslandPosition;
         private Line _currentMainLine;
-
+        private Tween _toSlotTween;
         private GameSettings _settings;
 
-        private CancellationToken _cancellationToken;
-        private CancellationTokenSource _moveIslandCancellationSource;
+        private Coroutine _moveToIslandCoroutine;
+
+        private bool _isOnTransition;
 
         private static readonly int Run = Animator.StringToHash(Constants.Constants.StickRunAnimationKey);
 
@@ -37,7 +37,12 @@ namespace _Project.Scripts.Game
         public void GoNewPlace(Line line, Vector3 finalLocalPosition, SlotGroup slotGroup, int stickIndex,
             int allStickCount)
         {
-            if (_onRoad) _currentSlotGroup.CurrentIsland.RemoveStickTo(this);
+            _toSlotTween?.Kill();
+            if (_onRoad)
+            {
+                _isOnTransition = true;
+                _currentSlotGroup.CurrentIsland.RemoveStickTo(this);
+            }
 
             _currentSlotGroup = slotGroup;
             _localIslandPosition = finalLocalPosition;
@@ -50,9 +55,9 @@ namespace _Project.Scripts.Game
                 positions[i] = linePositions[i + 1];
             }
 
+            _roadPositions.Clear();
             if (_onRoad)
             {
-                _roadPositions.Clear();
                 _roadPositions.Add(_targetPosition);
                 _currentMainLine.AddSiblingLine(line);
             }
@@ -70,12 +75,16 @@ namespace _Project.Scripts.Game
                 return;
             }
 
-            MoveToTargetIsland(_cancellationToken, stickIndex, () => { StickLastMovement(allStickCount, stickIndex); });
+            _onRoad = true;
+
+            _moveToIslandCoroutine =
+                StartCoroutine(MoveToTargetIsland(stickIndex, () => { StickLastMovement(allStickCount, stickIndex); }));
         }
 
         public void Activate()
         {
             gameObject.SetActive(true);
+            StopRunAnimation();
         }
 
         public void Deactivate()
@@ -85,20 +94,27 @@ namespace _Project.Scripts.Game
 
         public void Reset()
         {
-            Deactivate();
-            _roadPositions.Clear();
             _onRoad = false;
-            CancelMovementToken();
+            _isOnTransition = false;
+            if (_moveToIslandCoroutine != null)
+                StopCoroutine(_moveToIslandCoroutine);
+            
+            _toSlotTween?.Kill();
+            _roadPositions.Clear();
+            _currentMainLine = null;
+            StopRunAnimation();
+            Deactivate();
         }
 
         private void StickLastMovement(int allOnRoadStickCount, int stickIndex)
         {
-            transform.DOLocalMove(_localIslandPosition, _settings.lastMoveTime).OnComplete(() =>
+            _onRoad = false;
+            TransitionCompleteControl(allOnRoadStickCount, stickIndex);
+            _toSlotTween = transform.DOLocalMove(_localIslandPosition, _settings.lastMoveTime).OnComplete(() =>
             {
                 StopRunAnimation();
-                transform.DORotate(_currentSlotGroup.CurrentIsland.transform.eulerAngles, _settings.lastRotateTime);
-                _onRoad = false;
-                TransitionCompleteControl(allOnRoadStickCount, stickIndex);
+                _toSlotTween = transform.DORotate(_currentSlotGroup.CurrentIsland.transform.eulerAngles,
+                    _settings.lastRotateTime);
             });
         }
 
@@ -112,21 +128,24 @@ namespace _Project.Scripts.Game
             animator.SetBool(Run, false);
         }
 
-        private async void MoveToTargetIsland(CancellationToken cancellationToken, int index, Action done)
+        private IEnumerator MoveToTargetIsland(int index, Action done)
         {
-            _moveIslandCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            _targetPosition = _roadPositions[0];
+            yield return new WaitForSeconds(index * _settings.groupMoveDelayTime);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(index * _settings.groupMoveDelayTime),
-                    cancellationToken: _moveIslandCancellationSource.Token)
-                .SuppressCancellationThrow();
+            _targetPosition = _roadPositions[0];
             transform.SetParent(_currentSlotGroup.CurrentIsland.transform);
             var direction = (_targetPosition - transform.position).normalized;
             var targetRotation = Quaternion.LookRotation(direction);
+
             PlayRunAnimation();
-            _onRoad = true;
-            while (!_moveIslandCancellationSource.IsCancellationRequested)
+            while (true)
             {
+                if (_isOnTransition)
+                {
+                    yield return new WaitForSeconds(0.1f);
+                    _isOnTransition = false;
+                }
+
                 if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z),
                         new Vector2(_targetPosition.x, _targetPosition.z)) > 0.025f)
                 {
@@ -147,30 +166,23 @@ namespace _Project.Scripts.Game
                     targetRotation = Quaternion.LookRotation(direction);
                 }
 
-                await UniTask.Yield(cancellationToken: _moveIslandCancellationSource.Token).SuppressCancellationThrow();
+                yield return null;
             }
 
-            done.Invoke();
+                done.Invoke();
         }
 
 
         private void OnDestroy()
         {
-            CancelMovementToken();
-        }
-
-        private void CancelMovementToken()
-        {
-            if (_moveIslandCancellationSource is { Token: { IsCancellationRequested: false } })
-            {
-                _moveIslandCancellationSource.Cancel();
-            }
+            if (_moveToIslandCoroutine != null)
+                StopCoroutine(_moveToIslandCoroutine);
         }
 
         private void TransitionCompleteControl(int onRoadStickCount, int currentIndex)
         {
-            _currentMainLine.RemoveStick(this);
             _currentSlotGroup.CurrentIsland.RemoveStickTo(this);
+            _currentMainLine?.RemoveStick(this);
         }
     }
 }

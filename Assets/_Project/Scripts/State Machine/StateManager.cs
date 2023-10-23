@@ -34,8 +34,6 @@ namespace _Project.Scripts.State_Machine
             CurrentState?.OnExit();
             CurrentState = States[stateKey];
             CurrentState.OnEnter();
-
-            Debug.Log("The state " + stateKey + typeof(EState) + " starts.");
         }
 
         protected abstract void SetStates();

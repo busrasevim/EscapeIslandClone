@@ -151,7 +151,7 @@ namespace _Project.Scripts.Utils
             return list;
         }
     
-        public static void Shuffle<T>(IList<T> list)
+        public static void Shuffle(IList<T> list)
         {
             var n = list.Count;
             for (int i = n - 1; i > 0; i--)
