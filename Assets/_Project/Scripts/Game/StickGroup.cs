@@ -20,7 +20,7 @@ namespace _Project.Scripts.Game
             for (int i = 0; i < stickCount; i++)
             {
                 var stick = pool.SpawnFromPool(PoolTags.Stick, Vector3.zero, Quaternion.identity).GetComponent<Stick>();
-                stick.PrepareStick(material, settings);
+                stick.PrepareStick(material, settings.stickMovementSettings);
                 _stickGroup.Add(stick);
             }
         }

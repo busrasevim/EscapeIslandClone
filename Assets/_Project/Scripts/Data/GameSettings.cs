@@ -15,10 +15,7 @@ namespace _Project.Scripts.Data
         public float normalIslandOffset = 2f;
         public float bonusLevelRadius = 2.4f;
 
-        [Space(10)] [Header("STICKS")] public float stickMoveSpeed = 1.5f;
-        public float stickRotateSpeed = 9f;
-        public float lastMoveTime = 1f;
-        public float lastRotateTime = 0.5f;
-        public float groupMoveDelayTime = 0.5f;
+        [Space(10)] [Header("STICKS")] 
+        public StickMovementSettings stickMovementSettings;
     }
 }

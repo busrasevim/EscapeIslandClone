@@ -19,7 +19,7 @@ namespace _Project.Scripts.Game
         private Vector3 _localIslandPosition;
         private Line _currentMainLine;
         private Tween _toSlotTween;
-        private GameSettings _settings;
+        private StickMovementSettings _movementSettings;
 
         private Coroutine _moveToIslandCoroutine;
 
@@ -27,10 +27,10 @@ namespace _Project.Scripts.Game
 
         private static readonly int Run = Animator.StringToHash(Constants.Constants.StickRunAnimationKey);
 
-        public void PrepareStick(Material material, GameSettings settings)
+        public void PrepareStick(Material material, StickMovementSettings settings)
         {
             selfRenderer.material = material;
-            _settings = settings;
+            _movementSettings = settings;
             _roadPositions = new List<Vector3>();
         }
 
@@ -110,11 +110,11 @@ namespace _Project.Scripts.Game
         {
             _onRoad = false;
             TransitionCompleteControl(allOnRoadStickCount, stickIndex);
-            _toSlotTween = transform.DOLocalMove(_localIslandPosition, _settings.lastMoveTime).OnComplete(() =>
+            _toSlotTween = transform.DOLocalMove(_localIslandPosition, _movementSettings.lastMoveTime).OnComplete(() =>
             {
                 StopRunAnimation();
                 _toSlotTween = transform.DORotate(_currentSlotGroup.CurrentIsland.transform.eulerAngles,
-                    _settings.lastRotateTime);
+                    _movementSettings.lastRotateTime);
             });
         }
 
@@ -130,7 +130,7 @@ namespace _Project.Scripts.Game
 
         private IEnumerator MoveToTargetIsland(int index, Action done)
         {
-            yield return new WaitForSeconds(index * _settings.groupMoveDelayTime);
+            yield return new WaitForSeconds(index * _movementSettings.groupMoveDelayTime);
 
             _targetPosition = _roadPositions[0];
             transform.SetParent(_currentSlotGroup.CurrentIsland.transform);
@@ -149,9 +149,9 @@ namespace _Project.Scripts.Game
                 if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z),
                         new Vector2(_targetPosition.x, _targetPosition.z)) > 0.025f)
                 {
-                    transform.position += direction * (Time.deltaTime * _settings.stickMoveSpeed);
+                    transform.position += direction * (Time.deltaTime * _movementSettings.stickMoveSpeed);
                     transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation,
-                        _settings.stickRotateSpeed * Time.deltaTime);
+                        _movementSettings.stickRotateSpeed * Time.deltaTime);
                 }
                 else
                 {
